@@ -8,7 +8,7 @@ type Message = {
     content: string
     senderId: string
     senderName?: string
-    createdAt: string;
+    createdAt: string
     readAt?: string | null
     status?: 'sending' | 'sent' | 'failed'
 }

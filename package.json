@@ -17,6 +17,10 @@
   "directories": {
     "doc": "docs"
   },
+  "workspaces": [
+    "apps/*",
+    "contracts/*"
+  ],
   "scripts": {
     "build": "npm run build --prefix apps/web",
     "lint": "npm run lint --prefix apps/web",

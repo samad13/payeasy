@@ -8,6 +8,13 @@
         "start": "next start",
         "lint": "next lint",
         "format": "prettier --write .",
+<<<<<<< Updated upstream
+=======
+        "vitest": "vitest run",
+        "deploy:contract": "tsx scripts/deploy.ts",
+        "verify:contract": "tsx scripts/verify.ts",
+        "build:contract": "cd ../../contracts/rent-escrow && soroban contract build",
+>>>>>>> Stashed changes
         "test": "jest",
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",

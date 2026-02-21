@@ -14,9 +14,16 @@ import ListingPopup from './ListingPopup'
 import type { ListingPopupData } from './ListingPopup'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
-export interface MapListing extends ListingPopupData {
+export interface MapListing extends Partial<ListingPopupData> {
+    id: string
     latitude: number
     longitude: number
+    price: number
+    title?: string
+    location?: string
+    bedrooms?: number
+    bathrooms?: number
+    image?: string
 }
 
 interface ViewState {

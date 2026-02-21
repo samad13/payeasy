@@ -17,6 +17,10 @@
   "directories": {
     "doc": "docs"
   },
+  "workspaces": [
+    "apps/*",
+    "contracts/*"
+  ],
   "scripts": {
     "dev": "cd apps/web && npm run dev",
     "build": "cd apps/web && npm run build",
@@ -31,5 +35,6 @@
   },
   "dependencies": {
     "@upstash/redis": "^1.36.2"
-  }
+  },
+  "devDependencies": {}
 }

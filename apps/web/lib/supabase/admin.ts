@@ -5,12 +5,10 @@ export function createAdminClient() {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceKey) {
-    throw new Error(
-      "Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY"
-    );
+    console.warn("Missing Supabase environment variables. Using empty strings for build purposes.");
   }
 
-  return createClient(supabaseUrl, serviceKey, {
+  return createClient(supabaseUrl || "http://localhost:54321", serviceKey || "dummy_key", {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

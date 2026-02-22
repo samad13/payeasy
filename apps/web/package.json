@@ -16,9 +16,14 @@
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",
         "test:perf": "jest __tests__/performance/ --passWithNoTests",
-        "test:vitest": "vitest run",
-        "lh:ci": "lhci autorun"
+        "lh:ci": "lhci autorun",
+        "analyze": "ANALYZE=true next build",
+        "bundle:check": "node lib/bundle/check-size.mjs"
     },
+    "sideEffects": [
+        "*.css",
+        "*.scss"
+    ],
     "dependencies": {
         "@hookform/resolvers": "^5.2.2",
         "@radix-ui/react-slider": "^1.3.6",
@@ -85,6 +90,7 @@
         "ts-jest": "^29.4.6",
         "tsx": "^4.21.0",
         "typescript": "^5",
+        "@next/bundle-analyzer": "^14.0.3",
         "vitest": "^4.0.18"
     }
 }

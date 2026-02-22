@@ -1,15 +1,38 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import FilterSidebar from '../../components/FilterSidebar'
+import dynamic from 'next/dynamic'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import ViewToggle from '../../components/ViewToggle'
-import MapView from '../../components/MapView'
 import type { MapListing } from '../../components/MapView'
 import Image from 'next/image'
 import { MapPin, Bed, Bath, UserCircle } from 'lucide-react'
 import FavoriteButton from '../../components/FavoriteButton'
+
+const FilterSidebar = dynamic(() => import('../../components/FilterSidebar'), {
+    loading: () => (
+        <div className="h-[600px] w-full max-w-sm animate-pulse rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+            <div className="mb-6 h-6 w-32 rounded bg-gray-200" />
+            <div className="space-y-6">
+                <div className="h-10 rounded bg-gray-200" />
+                <div className="h-12 rounded bg-gray-200" />
+                <div className="h-12 rounded bg-gray-200" />
+                <div className="h-12 rounded bg-gray-200" />
+            </div>
+        </div>
+    ),
+    ssr: false,
+})
+
+const MapView = dynamic(() => import('../../components/MapView'), {
+    loading: () => (
+        <div className="h-full w-full bg-gray-100 rounded-xl animate-pulse flex items-center justify-center">
+            <span className="text-gray-400 text-sm">Loading map...</span>
+        </div>
+    ),
+    ssr: false,
+})
 
 // Types for Mock Data
 type Property = {

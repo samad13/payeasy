@@ -2,11 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { RentContractService } from "@/services/rent-contract";
 import { useWallet } from "@/hooks/useWallet";
-import { getFreighterPublicKey } from "@/lib/stellar/freighter";
-import { getStellarNetworkConfig } from "@/lib/stellar/network";
-import { getNetworkTransactionStatus } from "@/lib/stellar/contract-transactions";
 import { Loader2, AlertCircle, CheckCircle2, Wallet, ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
@@ -76,8 +72,10 @@ export default function PaymentPage() {
   const { isConnected, publicKey: walletKey, connect } = useWallet();
 
   useEffect(() => {
-    const config = getStellarNetworkConfig();
-    setNetworkName(config.name === "mainnet" ? "Mainnet" : "Testnet");
+    import("@/lib/stellar/network").then(({ getStellarNetworkConfig }) => {
+      const config = getStellarNetworkConfig();
+      setNetworkName(config.name === "mainnet" ? "Mainnet" : "Testnet");
+    });
   }, []);
 
   // Poll transaction status
@@ -87,6 +85,7 @@ export default function PaymentPage() {
     if (status === "processing" && txHash && paymentRecordId) {
       intervalId = setInterval(async () => {
         try {
+          const { getNetworkTransactionStatus } = await import("@/lib/stellar/contract-transactions");
           const result = await getNetworkTransactionStatus(txHash);
           
           if (result.status === "success") {
@@ -124,7 +123,9 @@ export default function PaymentPage() {
       // Fetch fee estimate
       setIsEstimatingFee(true);
       try {
+        const { getStellarNetworkConfig } = await import("@/lib/stellar/network");
         const networkConfig = getStellarNetworkConfig();
+        const { getFreighterPublicKey } = await import("@/lib/stellar/freighter");
         const res = await fetch("/api/payments/estimate-fee", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -162,6 +163,10 @@ export default function PaymentPage() {
     setError(null);
 
     try {
+      const { getFreighterPublicKey } = await import("@/lib/stellar/freighter");
+      const { getStellarNetworkConfig } = await import("@/lib/stellar/network");
+      const { RentContractService } = await import("@/services/rent-contract");
+
       const publicKey = walletKey || await getFreighterPublicKey();
       const networkConfig = getStellarNetworkConfig();
 

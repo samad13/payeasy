@@ -477,6 +477,36 @@ export interface UserFavoriteWithListing extends UserFavorite {
 }
 
 // ──────────────────────────────────────────────────────────────
+// GDPR Compliance
+// ──────────────────────────────────────────────────────────────
+
+export interface ConsentRecordRow {
+  id: string
+  user_id: string
+  consent_type: string
+  version: string
+  ip_address: string | null
+  created_at: ISOTimestamp
+}
+
+export type ConsentRecordInsert = Omit<ConsentRecordRow, 'id' | 'created_at'> & {
+  id?: string
+}
+
+export interface AuditLogRow {
+  id: string
+  user_id: string
+  action_type: string
+  outcome: string
+  details: any
+  created_at: ISOTimestamp
+}
+
+export type AuditLogInsert = Omit<AuditLogRow, 'id' | 'created_at'> & {
+  id?: string
+}
+
+// ──────────────────────────────────────────────────────────────
 // Supabase Database Generic Interface
 // ──────────────────────────────────────────────────────────────
 
@@ -534,6 +564,16 @@ export interface Database {
         Row: UserFavoriteRow
         Insert: UserFavoriteInsert
         Update: never // Favorites cannot be updated, only created/deleted
+      }
+      consent_records: {
+        Row: ConsentRecordRow
+        Insert: ConsentRecordInsert
+        Update: never
+      }
+      audit_logs: {
+        Row: AuditLogRow
+        Insert: AuditLogInsert
+        Update: never
       }
     }
     Views: Record<string, never>

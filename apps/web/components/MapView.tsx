@@ -294,7 +294,7 @@ export default function MapView({
                     className="[&_.mapboxgl-popup-content]:p-0 [&_.mapboxgl-popup-content]:bg-transparent [&_.mapboxgl-popup-content]:shadow-none [&_.mapboxgl-popup-tip]:border-t-white"
                 >
                     <ListingPopup
-                        listing={selectedListing}
+                        listing={selectedListing as ListingPopupData}
                         onClose={() => setSelectedListing(null)}
                     />
                 </Popup>

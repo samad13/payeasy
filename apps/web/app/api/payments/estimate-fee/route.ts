@@ -24,8 +24,8 @@ export async function POST(req: Request) {
       network: networkConfig.name,
     });
 
-    const feeStats = build.feeStats;
-    const baseFee = feeStats ? Number(feeStats.inclusionFee.mode) : 100;
+    const feeStats = build.feeStats as { inclusionFee?: { mode?: string } } | undefined;
+    const baseFee = feeStats?.inclusionFee?.mode ? Number(feeStats.inclusionFee.mode) : 100;
     const resourceFee = build.gasEstimate?.stroops ?? 0;
     const buffer = Math.ceil(resourceFee * 0.2);
     const totalFee = build.feeStroops;

@@ -13,3 +13,55 @@ body {
   background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb)))
     rgb(var(--background-start-rgb));
 }
+
+/* ── Admin glass utilities ── */
+
+.glass-card {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl;
+}
+
+.glass-glow {
+  @apply transition-shadow duration-300;
+}
+.glass-glow:hover {
+  box-shadow: 0 0 20px rgba(125, 0, 255, 0.3), 0 0 40px rgba(125, 0, 255, 0.1);
+}
+
+/* Override QuickActionCard inner styles via parent wrapper */
+.admin-quick-action > a {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: inherit;
+}
+.admin-quick-action > a:hover {
+  box-shadow: none !important;
+}
+.admin-quick-action > a svg {
+  color: #7D00FF !important;
+}
+.admin-quick-action > a h3,
+.admin-quick-action > a span {
+  color: #e5e7eb !important;
+}
+.admin-quick-action > a p {
+  color: #9ca3af !important;
+}
+
+/* Override RecentActivity inner styles via parent wrapper */
+.admin-activity > div {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.admin-activity > div > div + div {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.admin-activity h2,
+.admin-activity h3 {
+  color: #f3f4f6 !important;
+}
+.admin-activity p,
+.admin-activity span {
+  color: #9ca3af !important;
+}

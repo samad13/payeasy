@@ -42,7 +42,7 @@ export type BuiltContractTransaction = {
   network: StellarNetworkName;
   networkPassphrase: string;
   rpcUrl: string;
-  feeStats?: SorobanRpc.GetFeeStatsResponse;
+  feeStats?: Record<string, unknown>;
 };
 
 export type SubmittedTransaction = {
@@ -196,14 +196,15 @@ export async function buildContractTransaction(
   const args = (params.args ?? []).map((arg) => toScValArgument(arg));
 
 
-  let feeStats: SorobanRpc.GetFeeStatsResponse | undefined;
+  let feeStats: Record<string, unknown> | undefined;
   try {
-    feeStats = await server.getFeeStats();
+    feeStats = await (server as unknown as { getFeeStats: () => Promise<Record<string, unknown>> }).getFeeStats();
   } catch (e) {
     console.warn("Failed to fetch fee stats, using default base fee", e);
   }
 
-  const baseFee = params.baseFee ?? (feeStats ? Number(feeStats.inclusionFee.mode) : Number(BASE_FEE));
+  const parsedFeeStats = feeStats as { inclusionFee?: { mode?: string } } | undefined;
+  const baseFee = params.baseFee ?? (parsedFeeStats?.inclusionFee?.mode ? Number(parsedFeeStats.inclusionFee.mode) : Number(BASE_FEE));
 
   const initialTransaction = new TransactionBuilder(account, {
     fee: baseFee.toString(),

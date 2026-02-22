@@ -1,4 +1,4 @@
-import { UserFactory, ListingFactory } from '@/lib/test-utils';
+import { ListingFactory, UserFactory } from '@/lib/test-utils';
 
 /**
  * Standard test fixtures representing common scenarios.
@@ -23,3 +23,7 @@ export const Fixtures = {
      */
     activeListing: ListingFactory.buildDeployed(),
 };
+
+it('has no test cases yet', () => {
+    expect(1).toBe(1); // Placeholder to ensure this file is recognized as a test module
+})

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getRecommendations } from '@/lib/recommendation/engine';
 
 export async function GET (request: NextRequest) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const userId = getUserId(request);
     if (!userId) {
         return errorResponse("Authentication required.", 401, "UNAUTHORIZED");
@@ -19,7 +19,7 @@ export async function GET (request: NextRequest) {
     }
 
     // Fetch user data
-    const { data: userData } = await (await supabase)
+    const { data: userData } = await supabase
         .from('users')
         .select('*')
         .eq('public_key', userId)

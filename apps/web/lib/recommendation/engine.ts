@@ -1,14 +1,14 @@
 import { getUserFavorites, getUserPreferences, getUserSearchHistory } from './user-data';
 import { upstashGet, upstashSet } from './cache';
 
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { getSimilarListings } from './similar-listings';
 
 /**
  * Save user feedback for recommendations
  */
 export async function saveRecommendationFeedback (userId: string, feedback: { rating: number, comments?: string, abVariant?: string }) {
-    const supabase = createServerClient();
+    const supabase = await createClient();
     await supabase.from('user_recommendation_feedback').insert({
         user_id: userId,
         rating: feedback.rating,

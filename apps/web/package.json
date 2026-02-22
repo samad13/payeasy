@@ -19,6 +19,7 @@
         "lh:ci": "lhci autorun"
     },
     "dependencies": {
+        "@fontsource-variable/inter": "^5.2.6",
         "@hookform/resolvers": "^5.2.2",
         "@radix-ui/react-slider": "^1.3.6",
         "@stellar/freighter-api": "^1.5.0",

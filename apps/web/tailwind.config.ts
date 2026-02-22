@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss/types";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 const config: Config = {
   content: ["./app/**/*.{js,ts,jsx,tsx,mdx}", "./components/**/*.{js,ts,jsx,tsx,mdx}"],
@@ -13,6 +14,9 @@ const config: Config = {
       '2xl': '1536px', // Large desktops
     },
     extend: {
+      fontFamily: {
+        sans: ["Inter", ...defaultTheme.fontFamily.sans],
+      },
       colors: {
         primary: "#7D00FF", // Stellar Violet
         secondary: "#000000",

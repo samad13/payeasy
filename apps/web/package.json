@@ -57,6 +57,7 @@
         "supercluster": "^8.0.1",
         "swr": "^2.4.0",
         "tailwind-merge": "^2.0.0",
+        "web-vitals": "^4.2.4",
         "xlsx": "^0.18.5",
         "zod": "^4.3.6"
     },

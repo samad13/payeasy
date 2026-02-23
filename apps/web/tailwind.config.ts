@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss/types";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 const config: Config = {
   content: ["./app/**/*.{js,ts,jsx,tsx,mdx}", "./components/**/*.{js,ts,jsx,tsx,mdx}"],
@@ -16,6 +17,9 @@ const config: Config = {
       // ============================================
       // COLOR SYSTEM
       // ============================================
+      fontFamily: {
+        sans: ["Inter", ...defaultTheme.fontFamily.sans],
+      },
       colors: {
         // Primary Colors - Stellar Violet
         primary: {

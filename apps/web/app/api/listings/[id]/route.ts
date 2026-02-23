@@ -8,6 +8,57 @@ const amenitiesSchema = z
   .max(30, 'Cannot have more than 30 amenities')
   .optional()
 
+/** GET — Fetch a listing by ID */
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // MOCK DATA MODE - Database connection bypassed
+  const { id: listingId } = await params
+  const mockListing = {
+    id: listingId,
+    title: "Luxury Downtown Apartment with City Views",
+    price: 3500,
+    bedrooms: 2,
+    bathrooms: 2,
+    description: "Experience the height of luxury in this stunning downtown apartment. Featuring floor-to-ceiling windows, a chef's kitchen with Viking appliances, and a private terrace overlooking the city skyline. The building offers 24/7 concierge, a state-of-the-art fitness center, and a rooftop infinity pool. Perfectly located near the best dining and entertainment districts.",
+    amenities: [
+      "High-speed Wifi", 
+      "Gourmet Kitchen", 
+      "Washer & Dryer", 
+      "Central Air", 
+      "Heating", 
+      "Smart TV", 
+      "Dedicated Workspace", 
+      "Gym Access", 
+      "Rooftop Pool", 
+      "Doorman"
+    ],
+    images: [
+      "/images/airbnb1.jpg",
+      "/images/airbnb2.jpg",
+      "/images/airbnb3.jpg",
+      "/images/airbnb4.webp"
+    ],
+    latitude: 40.7128,
+    longitude: -74.0060,
+    moveInDate: new Date().toISOString(),
+    leaseTerms: "12 Months",
+    landlord: {
+      id: "landlord-mock-1",
+      name: "Sarah Jenkins",
+      email: "sarah.j@example.com",
+      avatar: null // or a placeholder URL if available
+    },
+    address: "123 Broadway, New York, NY 10013"
+  }
+
+  // Simulate network latency
+  await new Promise(resolve => setTimeout(resolve, 800));
+
+  return successResponse(mockListing)
+}
+
 /** PUT — Update a listing (owner only) */
 export async function PUT(
   request: Request,

@@ -1,0 +1,64 @@
+{{
+  "rules": [
+    {
+      "id": "payeasy-security-rules",
+      "patterns": [
+        {
+          "pattern": "eval(...)",
+          "message": "eval() is a security risk and should not be used",
+          "severity": "ERROR"
+        },
+        {
+          "pattern": "$$ = require(...)",
+          "message": "Dynamic require can be a security risk",
+          "severity": "WARNING",
+          "languages": ["javascript", "typescript"]
+        },
+        {
+          "pattern": "exec(...)",
+          "message": "Use of exec() may lead to command injection",
+          "severity": "ERROR"
+        },
+        {
+          "pattern": "child_process.exec(...)",
+          "message": "Avoid child_process.exec(), use execFile instead",
+          "severity": "ERROR",
+          "languages": ["javascript", "typescript"]
+        }
+      ],
+      "message": "Potential security issues detected",
+      "languages": ["javascript", "typescript"],
+      "severity": "ERROR"
+    },
+    {
+      "id": "payeasy-crypto-rules",
+      "patterns": [
+        {
+          "pattern": "crypto.createHash('md5')",
+          "message": "MD5 is cryptographically broken, use SHA-256",
+          "severity": "ERROR"
+        },
+        {
+          "pattern": "crypto.randomBytes(...).toString('hex')",
+          "message": "Weak random number generation detected",
+          "severity": "WARNING"
+        }
+      ]
+    },
+    {
+      "id": "payeasy-injection-rules",
+      "patterns": [
+        {
+          "pattern": "$$ + user_input",
+          "message": "SQL injection vulnerability - use parameterized queries",
+          "severity": "ERROR"
+        },
+        {
+          "pattern": "db.query(...)",
+          "message": "Ensure parameterized queries are used",
+          "severity": "WARNING"
+        }
+      ]
+    }
+  ]
+}}

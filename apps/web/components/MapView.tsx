@@ -208,7 +208,7 @@ export default function MapView({
     return (
         <MapGL
             ref={mapRef}
-            {...viewState}
+            initialViewState={viewState}
             onMove={handleMove}
             onLoad={handleLoad}
             mapboxAccessToken={MAPBOX_TOKEN}
@@ -294,7 +294,15 @@ export default function MapView({
                     className="[&_.mapboxgl-popup-content]:p-0 [&_.mapboxgl-popup-content]:bg-transparent [&_.mapboxgl-popup-content]:shadow-none [&_.mapboxgl-popup-tip]:border-t-white"
                 >
                     <ListingPopup
-                        listing={selectedListing as ListingPopupData}
+                        listing={{
+                            id: selectedListing.id,
+                            title: selectedListing.title || 'Untitled Listing',
+                            price: selectedListing.price,
+                            location: selectedListing.location || 'Unknown Location',
+                            bedrooms: selectedListing.bedrooms || 0,
+                            bathrooms: selectedListing.bathrooms || 0,
+                            image: selectedListing.image || '/images/airbnb1.jpg',
+                        }}
                         onClose={() => setSelectedListing(null)}
                     />
                 </Popup>

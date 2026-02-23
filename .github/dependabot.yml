@@ -1,0 +1,87 @@
+# Dependabot Configuration
+# Automated dependency vulnerability scanning and patching
+
+version: 2
+updates:
+  # npm Dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "03:00"
+      timezone: "UTC"
+    reviewers:
+      - "Ogstevyn"
+    labels:
+      - "security"
+      - "dependencies"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "/"
+    rebase-strategy: "timestamp"
+    allow:
+      - dependency-type: "all"
+    open-pull-requests-limit: 10
+
+  # npm Dependencies - apps/web
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "daily"
+      time: "03:30"
+      timezone: "UTC"
+    reviewers:
+      - "Ogstevyn"
+    labels:
+      - "security"
+      - "dependencies"
+      - "web"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+    rebase-strategy: "timestamp"
+    open-pull-requests-limit: 10
+
+  # Docker Base Images
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    reviewers:
+      - "Ogstevyn"
+    labels:
+      - "security"
+      - "docker"
+      - "infrastructure"
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
+    rebase-strategy: "timestamp"
+    open-pull-requests-limit: 5
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:30"
+      timezone: "UTC"
+    reviewers:
+      - "Ogstevyn"
+    labels:
+      - "security"
+      - "ci/cd"
+      - "github-actions"
+    commit-message:
+      prefix: "ci: update"
+      include: "scope"
+    rebase-strategy: "timestamp"
+    open-pull-requests-limit: 5

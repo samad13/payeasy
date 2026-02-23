@@ -1,0 +1,58 @@
+# OWASP ZAP Baseline Scan Rules Configuration
+# Rules to skip or modify for baseline scanning
+# Rule ID format: NNNN (4 digits)
+
+# Exclude rules that commonly produce false positives or are not applicable
+OUTOFSCOPE:10100	# Soft-tagging: It was found, but not the target
+OUTOFSCOPE:10110	# Soft-tagging: It was found, but (seems) not the target
+
+# Content Security Policy rules
+# CSP may be intentionally lenient during development
+IGNORE:10038	# Content Security Policy Header Not Set (Set to warning for dev)
+
+# Information disclosure rules
+# Some information is okay to expose (version info, etc.)
+WARN:10024	# Information Disclosure - Sensitive Comments
+WARN:10027	# Information Disclosure - Suspicious Comments
+
+# Password field not masked
+IGNORE:10026	# Password field should not be visible
+
+# Cookie handling
+WARN:10054	# Cookie Security Header Missing
+
+# TLS/SSL certificate issues
+# These may be intentional in dev/staging environments
+IGNORE:10081	# certificate subject/altnames does not match 'this' request's target
+
+# Cross-Site Scripting (XSS) - very common in modern frameworks
+# These should still be reported but allowed
+WARN:10038	# Cross Site Scripting - Reflected
+WARN:10039	# Cross Site Scripting - Stored
+WARN:10040	# Cross Site Scripting - DOM
+
+# Source Code Disclosure
+WARN:10045	# Source Code Disclosure PHP
+WARN:10046	# Source Code Disclosure JSP
+WARN:10043	# Source Code Disclosure ASP
+
+# Misconfiguration Issues
+WARN:10031	# Proper exception handling
+WARN:10032	# Suspicious file inclusion
+
+# Directory Listing
+IGNORE:10033	# Directory listing enabled (acceptable for API docs)
+
+# Weak SSL/TLS
+WARN:10059	# Weak SSL/TLS cipher
+WARN:10074	# Cookie using httponly flag
+
+# Clickjacking
+WARN:10020	# X-Frame-Options header missing or not properly set
+
+# Missing headers
+WARN:10035	# Strict Transport Security Header Missing
+WARN:10036	# Server Leaks Version Information via "Server" HTTP Response Header Field
+
+# Long description here
+# Format: RULE_TYPE:RULE_ID (RULE_TYPE can be IGNORE, WARN, or OUTOFSCOPE)

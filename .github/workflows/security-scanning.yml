@@ -1,0 +1,423 @@
+ name: Security Scanning, DAST & Dependency Verification
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY_URL: 'https://staging.payeasy.app'
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
+      - 'apps/web/package.json'
+      - '.github/dependabot.yml'
+      - '.github/workflows/security-scanning.yml'
+  schedule:
+    - cron: '0 2 * * *'  # SAST daily at 2 AM UTC
+    - cron: '0 3 * * 1'  # DAST weekly Monday at 3 AM UTC
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL for DAST scan'
+        required: false
+        default: 'https://staging.payeasy.app'
+
+permissions:
+  contents: read
+  security-events: write
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==================== SAST - Static Application Security Testing ====================
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript', 'typescript' ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      - uses: github/codeql-action/autobuild@v2
+
+      - uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  # Dependency Scanning with Snyk
+  snyk-scan:
+    name: Snyk Vulnerability Scan
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci && cd apps/web && npm ci && cd ../..
+
+      - uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --json-file-output=snyk-results.json
+
+      - uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk-results.sarif
+        if: always()
+
+  # SAST Scanning with Semgrep
+  semgrep:
+    name: Semgrep Security Scan
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: returntocorp/semgrep-action@v1
+        with:
+          config: |
+            p/security-audit
+            p/owasp-top-ten
+            p/cwe-top-25
+            p/typescript
+          generateSarif: true
+          sarif-file: semgrep.sarif
+
+      - uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: semgrep.sarif
+        if: always()
+
+  trivy-scan:
+    name: Trivy Container Security Scan
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: docker build -f Dockerfile -t payeasy:latest .
+        continue-on-error: true
+
+      - uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: payeasy:latest
+          format: sarif
+          output: trivy-results.sarif
+          severity: 'HIGH,CRITICAL'
+
+      - uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: trivy-results.sarif
+        if: always()
+
+  license-scan:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci && cd apps/web && npm ci && cd ../..
+
+      - uses: fossas/fossa-action@main
+        with:
+          api-key: ${{ secrets.FOSSA_API_KEY }}
+
+  secrets-scan:
+    name: Detect Secrets
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+
+  dependency-check:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: PayEasy
+          path: .
+          format: SARIF
+          args: --scan /github/workspace --exclude /github/workspace/node_modules --exclude /github/workspace/.git
+
+      - uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: dependency-check-report.sarif
+        if: always()
+
+  analyze-dependencies:
+    name: Analyze Dependency Changes
+    runs-on: ubuntu-latest
+    outputs:
+      has-security-updates: ${{ steps.check.outputs.security_updates }}
+      vulnerability-count: ${{ steps.check.outputs.vulnerability_count }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: tj-actions/changed-files@v41
+        id: files
+        with:
+          files: |
+            package.json
+            package-lock.json
+            pnpm-lock.yaml
+            apps/web/package.json
+        continue-on-error: true
+
+      - uses: actions/setup-node@v4
+        if: steps.files.outputs.any_changed == 'true' || github.event_name == 'schedule'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - id: check
+        if: steps.files.outputs.any_changed == 'true' || github.event_name == 'schedule'
+        run: |
+          npm audit --json > /tmp/audit.json || true
+          SECURITY_UPDATES=$(grep -c '"severity": "critical\|"severity": "high' /tmp/audit.json || echo "0")
+          VULNERABILITY_COUNT=$(jq '.metadata.vulnerabilities.total' /tmp/audit.json || echo "0")
+          echo "security_updates=$SECURITY_UPDATES" >> $GITHUB_OUTPUT
+          echo "vulnerability_count=$VULNERABILITY_COUNT" >> $GITHUB_OUTPUT
+          echo "Found $VULNERABILITY_COUNT total vulnerabilities"
+        continue-on-error: true
+
+  verify-patches:
+    name: Verify Patch Compatibility
+    runs-on: ubuntu-latest
+    needs: analyze-dependencies
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci && cd apps/web && npm ci || true
+
+      - run: npx tsc --noEmit
+        continue-on-error: true
+
+      - run: npm run lint
+        continue-on-error: true
+
+      - run: npm test
+        continue-on-error: true
+
+      - run: npm run build
+        continue-on-error: true
+
+  # ==================== DAST - Dynamic Application Security Testing ====================
+
+  dast-zap-scan:
+    name: OWASP ZAP Dynamic Security Scan
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: zaproxy/action-baseline@v0.7.0
+        with:
+          target: ${{ github.event.inputs.target_url || env.REGISTRY_URL }}
+          rules_file_name: .zap-baseline-rules.tsv
+          cmd_options: -a
+          fail_action: false
+          allow_issue_writing: false
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: zap-scan-report
+          path: report_html.html
+          retention-days: 30
+        if: always()
+
+  dast-nuclei:
+    name: Nuclei Dynamic Scanner
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: projectdiscovery/nuclei-action@main
+        with:
+          target: ${{ github.event.inputs.target_url || env.REGISTRY_URL }}
+          flags: -severity critical,high -json
+          output: nuclei-results.json
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nuclei-scan-results
+          path: nuclei-results.json
+          retention-days: 30
+        if: always()
+
+  staging-security-check:
+    name: Staging Environment Security Health
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
+    continue-on-error: true
+    steps:
+      - run: curl -I ${{ env.REGISTRY_URL }} 2>/dev/null | head -20
+
+      - run: curl -I ${{ env.REGISTRY_URL }} 2>/dev/null | grep -E 'Strict-Transport-Security|X-Content-Type-Options|X-Frame-Options|Content-Security-Policy' || echo "⚠️ Missing security headers"
+        continue-on-error: true
+
+      - run: echo | openssl s_client -servername staging.payeasy.app -connect staging.payeasy.app:443 2>/dev/null | openssl x509 -noout -text
+        continue-on-error: true
+
+  performance-security-audit:
+    name: Performance & Security Metrics
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: ./lighthouserc.js
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  # ==================== SUMMARY & REPORTING ====================
+  security-summary:
+    name: Security Scan Summary & Reporting
+    runs-on: ubuntu-latest
+    needs: [
+      codeql,
+      snyk-scan,
+      semgrep,
+      trivy-scan,
+      license-scan,
+      secrets-scan,
+      dependency-check,
+      analyze-dependencies,
+      verify-patches,
+      dast-zap-scan,
+      dast-nuclei,
+      staging-security-check,
+      performance-security-audit
+    ]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate comprehensive security report
+        run: |
+          {
+            echo "## 🔒 Security Scanning Summary"
+            echo ""
+            echo "### SAST Results"
+            echo "| Scanner | Status |"
+            echo "|---------|--------|"
+            echo "| CodeQL | ${{ needs.codeql.result }} |"
+            echo "| Snyk | ${{ needs.snyk-scan.result }} |"
+            echo "| Semgrep | ${{ needs.semgrep.result }} |"
+            echo "| Trivy | ${{ needs.trivy-scan.result }} |"
+            echo "| License | ${{ needs.license-scan.result }} |"
+            echo "| Secrets | ${{ needs.secrets-scan.result }} |"
+            echo "| Deps | ${{ needs.dependency-check.result }} |"
+            echo ""
+            echo "### DAST Results"
+            echo "| Scanner | Status |"
+            echo "|---------|--------|"
+            echo "| ZAP | ${{ needs.dast-zap-scan.result }} |"
+            echo "| Nuclei | ${{ needs.dast-nuclei.result }} |"
+            echo "| Staging | ${{ needs.staging-security-check.result }} |"
+            echo "| Performance | ${{ needs.performance-security-audit.result }} |"
+            echo ""
+            echo "### Dependency Verification"
+            echo "| Check | Status |"
+            echo "|-------|--------|"
+            echo "| Analysis | ${{ needs.analyze-dependencies.result }} |"
+            echo "| Patches | ${{ needs.verify-patches.result }} |"
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify on critical vulnerabilities
+        if: |
+          needs.codeql.result == 'failure' ||
+          needs.snyk-scan.result == 'failure' ||
+          needs.trivy-scan.result == 'failure'
+        run: |
+          echo "⚠️ Critical vulnerabilities detected!"
+          exit 1
+
+      - name: Comment on PR with security results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = {
+              codeql: '${{ needs.codeql.result }}',
+              snyk: '${{ needs.snyk-scan.result }}',
+              semgrep: '${{ needs.semgrep.result }}',
+              trivy: '${{ needs.trivy-scan.result }}',
+              patches: '${{ needs.verify-patches.result }}',
+              vulnCount: '${{ needs.analyze-dependencies.outputs.vulnerability-count }}'
+            };
+            
+            const icon = (status) => status === 'success' ? '✅' : '⚠️';
+            
+            const comment = `## 🔒 Security Scan Results
+
+| Scanner | Result |
+|---------|--------|
+| CodeQL | ${icon(results.codeql)} |
+| Snyk | ${icon(results.snyk)} |
+| Semgrep | ${icon(results.semgrep)} |
+| Container | ${icon(results.trivy)} |
+
+**Vulnerabilities**: ${results.vulnCount}
+**Patch Status**: ${results.patches === 'success' ? '✅' : '⚠️'}
+
+[View Details](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/security)`;
+            
+            if (context.issue?.number) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }

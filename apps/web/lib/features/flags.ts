@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 
@@ -15,13 +14,24 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 const getSupabase = () => createClient(supabaseUrl, supabaseKey);
 
 /**
+ * Hash a string using Web Crypto API (Edge Runtime compatible)
+ */
+async function hashString(str: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
  * Deterministically evaluates if a user falls within a rollout bucket based on their ID and the flag key
  */
-export function evaluateRollout(userId: string, flagKey: string, percentage: number): boolean {
+export async function evaluateRollout(userId: string, flagKey: string, percentage: number): Promise<boolean> {
     if (percentage <= 0) return false;
     if (percentage >= 100) return true;
 
-    const hash = crypto.createHash('md5').update(`${userId}:${flagKey}`).digest('hex');
+    const hash = await hashString(`${userId}:${flagKey}`);
     const numericHash = parseInt(hash.substring(0, 8), 16);
     return (numericHash % 100) < percentage;
 }
@@ -79,7 +89,7 @@ export async function isFeatureEnabled(userId: string, flagKey: string, userSegm
     }
 
     // Evaluate Gradual Rollout
-    const rolloutAllows = evaluateRollout(userId, flagKey, flag.rollout_percentage);
+    const rolloutAllows = await evaluateRollout(userId, flagKey, flag.rollout_percentage);
     trackEvaluation(userId, flagKey, rolloutAllows);
 
     return rolloutAllows;

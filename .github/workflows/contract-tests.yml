@@ -1,0 +1,32 @@
+name: Soroban Contract Tests
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'contracts/rent-escrow/**'
+      - '.github/workflows/contract-tests.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'contracts/rent-escrow/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets:wasm32-unknown-unknown
+
+      - name: Install Soroban CLI
+        run: cargo install --locked soroban-cli
+
+      - name: Run Tests
+        run: |
+          cd contracts/rent-escrow
+          cargo test --features testutils

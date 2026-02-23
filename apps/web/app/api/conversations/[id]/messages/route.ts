@@ -50,25 +50,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     const { page, pageSize, offset } = pagination.data!;
 
-    // 4. Count total (non-deleted) messages
-    const { count: totalCount, error: countError } = await supabase
+    // 4. Fetch page and total count in one query
+    const { data: messages, error: msgError, count: totalCount } = await supabase
       .from("messages")
-      .select("*", { count: "exact", head: true })
-      .eq("conversation_id", conversationId)
-      .is("deleted_at", null);
-
-    if (countError) {
-      console.error("Failed to count messages:", countError);
-      return errorResponse("Failed to load messages.", 500, "INTERNAL_ERROR");
-    }
-
-    const total = totalCount ?? 0;
-    const totalPages = Math.ceil(total / pageSize);
-
-    // 5. Fetch page
-    const { data: messages, error: msgError } = await supabase
-      .from("messages")
-      .select("*")
+      .select("*", { count: "exact" })
       .eq("conversation_id", conversationId)
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
@@ -78,6 +63,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       console.error("Failed to fetch messages:", msgError);
       return errorResponse("Failed to load messages.", 500, "INTERNAL_ERROR");
     }
+
+    const total = totalCount ?? 0;
+    const totalPages = Math.ceil(total / pageSize);
 
     const response: PaginatedResponse<Message> = {
       data: (messages as Message[]) ?? [],

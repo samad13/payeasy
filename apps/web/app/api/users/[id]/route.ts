@@ -1,61 +1,21 @@
 import { type NextRequest } from "next/server";
 import { getUserId, successResponse, errorResponse } from "@/lib/api-utils";
 import { getServerClient } from "@/lib/supabase/server";
+import { getMockUserById } from "@/lib/mock/users";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id: idParam } = await params;
+  const { id } = await params;
 
-    // Resolve user id: "me" -> auth cookie, otherwise the path param
-    const supabase = await getServerClient();
+  // Simulate artificial delay
+  await new Promise((resolve) => setTimeout(resolve, 800));
 
-    let targetId: string | null = null;
-    if (idParam === "me") {
-      targetId = getUserId(request) as string | null;
-      if (!targetId) return errorResponse("Unauthorized", 401);
-    } else {
-      targetId = idParam;
-    }
+  const mockData = getMockUserById(id);
 
-    // Fetch user row
-    const { data: user, error: userErr } = await supabase
-      .from("users")
-      .select("id,username,email,public_key,avatar_url,bio,created_at")
-      .eq("id", targetId)
-      .maybeSingle();
-
-    if (userErr) return errorResponse(userErr.message, 400);
-    if (!user) return errorResponse("User not found", 404);
-
-    // Count listings for the user (exclude deleted)
-    const { count, error: countErr } = await supabase
-      .from("listings")
-      .select("id", { count: "exact", head: true })
-      .eq("landlord_id", targetId)
-      .neq("status", "deleted");
-
-    const listingsCount = count ?? 0;
-
-    // If the request asked for "me" we already enforced auth via cookie.
-    // For public profiles (other users) we avoid returning email.
-    const requester = getUserId(request);
-    const isOwn = requester === targetId;
-
-    const payload = {
-      id: user.id,
-      username: user.username,
-      email: isOwn ? user.email : null,
-      public_key: user.public_key,
-      avatar_url: user.avatar_url,
-      bio: user.bio,
-      created_at: user.created_at,
-      listings_count: listingsCount,
-    };
-
-    return successResponse(payload);
-  } catch (err) {
-    return errorResponse("Internal server error", 500);
+  if (!mockData) {
+    return errorResponse("User not found", 404);
   }
+
+  return successResponse(mockData);
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {

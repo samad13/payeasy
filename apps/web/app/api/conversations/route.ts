@@ -47,33 +47,54 @@ export async function GET(request: NextRequest) {
       return errorResponse("Failed to load conversations.", 500, "INTERNAL_ERROR");
     }
 
-    // 4. Enrich each conversation with last message + participants
-    const previews: ConversationPreview[] = await Promise.all(
-      (conversations ?? []).map(async (conv) => {
-        // Last message (non-deleted)
-        const { data: lastMessages } = await supabase
-          .from("messages")
-          .select("content, sender_id, created_at")
-          .eq("conversation_id", conv.id)
-          .is("deleted_at", null)
-          .order("created_at", { ascending: false })
-          .limit(1);
-
-        // All participants
-        const { data: participants } = await supabase
+    // 4. Batch-load last messages + participants to avoid N+1 queries
+    const [{ data: lastMessages, error: lastMessageError }, { data: participants, error: participantError }] =
+      await Promise.all([
+        supabase
+          .from("conversation_last_messages")
+          .select("conversation_id, content, sender_id, created_at")
+          .in("conversation_id", conversationIds),
+        supabase
           .from("conversation_participants")
-          .select("id, user_id")
-          .eq("conversation_id", conv.id);
+          .select("id, user_id, conversation_id")
+          .in("conversation_id", conversationIds),
+      ]);
 
-        return {
-          id: conv.id,
-          created_at: conv.created_at,
-          updated_at: conv.updated_at,
-          last_message: lastMessages?.[0] ?? null,
-          participants: participants ?? [],
-        };
-      })
+    if (lastMessageError) {
+      console.error("Failed to fetch last messages:", lastMessageError);
+      return errorResponse("Failed to load conversations.", 500, "INTERNAL_ERROR");
+    }
+
+    if (participantError) {
+      console.error("Failed to fetch participants:", participantError);
+      return errorResponse("Failed to load conversations.", 500, "INTERNAL_ERROR");
+    }
+
+    const lastMessageMap = new Map(
+      (lastMessages ?? []).map((message) => [
+        message.conversation_id,
+        {
+          content: message.content,
+          sender_id: message.sender_id,
+          created_at: message.created_at,
+        },
+      ])
     );
+
+    const participantsMap = new Map<string, { id: string; user_id: string }[]>();
+    (participants ?? []).forEach((participant) => {
+      const list = participantsMap.get(participant.conversation_id) ?? [];
+      list.push({ id: participant.id, user_id: participant.user_id });
+      participantsMap.set(participant.conversation_id, list);
+    });
+
+    const previews: ConversationPreview[] = (conversations ?? []).map((conv) => ({
+      id: conv.id,
+      created_at: conv.created_at,
+      updated_at: conv.updated_at,
+      last_message: lastMessageMap.get(conv.id) ?? null,
+      participants: participantsMap.get(conv.id) ?? [],
+    }));
 
     return successResponse(previews);
   } catch (err) {

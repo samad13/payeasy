@@ -12,3 +12,6 @@ impl RentContract {
 }
 
 mod test;
+
+#[cfg(test)]
+mod testutils;

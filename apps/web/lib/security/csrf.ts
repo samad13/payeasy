@@ -1,5 +1,16 @@
-import { randomBytes } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
+ 
+function randomBytes(length: number): Uint8Array {
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return array;
+}
+ 
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 /**
  * CSRF token storage interface
@@ -58,7 +69,7 @@ class CSRFManager {
    * Generate a new CSRF token
    */
   generateToken(sessionId: string): string {
-    const token = randomBytes(this.config.tokenLength).toString('hex');
+    const token = bytesToHex(randomBytes(this.config.tokenLength));
     const now = Date.now();
 
     this.tokenStore.set(sessionId, {
@@ -246,7 +257,7 @@ export function getSessionId(request: NextRequest): string {
   }
 
   // Generate new session ID if not present
-  return randomBytes(16).toString('hex');
+  return bytesToHex(randomBytes(16));
 }
 
 /**

@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { Keypair } from "stellar-sdk";
 
@@ -14,6 +13,24 @@ const JWT_EXPIRY = "24h";
 
 /** Prefix used to build the challenge message. */
 const MESSAGE_PREFIX = "PayEasy Login:";
+
+/**
+ * Generate random bytes using Web Crypto API (Edge Runtime compatible)
+ */
+function randomBytes(length: number): Uint8Array {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return array;
+}
+
+/**
+ * Convert Uint8Array to hex string
+ */
+function bytesToHex(bytes: Uint8Array): string {
+    return Array.from(bytes)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+}
 
 // ---------------------------------------------------------------------------
 // Challenge helpers
@@ -32,7 +49,7 @@ export interface Challenge {
  *   "PayEasy Login: <nonce>.<timestamp>"
  */
 export function generateChallenge(): Challenge {
-    const nonce = crypto.randomBytes(32).toString("hex");
+    const nonce = bytesToHex(randomBytes(32));
     const timestamp = Date.now();
     const message = `${MESSAGE_PREFIX} ${nonce}.${timestamp}`;
     return { nonce, timestamp, message };

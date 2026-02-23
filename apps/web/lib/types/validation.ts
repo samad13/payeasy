@@ -171,22 +171,22 @@ export const listingAmenityInsertSchema = z.object({
 // Message Schemas
 // ──────────────────────────────────────────────────────────────
 
-export const messageInsertSchema = z
-  .object({
-    id: uuidSchema.optional(),
-    sender_id: uuidSchema,
-    listing_id: uuidSchema.optional().nullable(),
-    recipient_id: uuidSchema.optional().nullable(),
-    content: z
-      .string()
-      .min(1, 'Message cannot be empty')
-      .max(10_000, 'Message cannot exceed 10 000 characters'),
-    read: z.boolean().default(false),
-  })
-  .refine(
-    (data) => data.listing_id != null || data.recipient_id != null,
-    { message: 'A message must target either a listing or a recipient' },
-  )
+export const messageInsertBaseSchema = z.object({
+  id: uuidSchema.optional(),
+  sender_id: uuidSchema,
+  listing_id: uuidSchema.optional().nullable(),
+  recipient_id: uuidSchema.optional().nullable(),
+  content: z
+    .string()
+    .min(1, 'Message cannot be empty')
+    .max(10_000, 'Message cannot exceed 10 000 characters'),
+  read: z.boolean().default(false),
+})
+
+export const messageInsertSchema = messageInsertBaseSchema.refine(
+  (data) => data.listing_id != null || data.recipient_id != null,
+  { message: 'A message must target either a listing or a recipient' },
+)
 
 export const messageUpdateSchema = z.object({
   read: z.boolean(),
@@ -227,7 +227,7 @@ export const paymentRecordUpdateSchema = paymentRecordInsertSchema
 // RentAgreement Schemas
 // ──────────────────────────────────────────────────────────────
 
-const rentAgreementBaseSchema = z.object({
+export const rentAgreementInsertBaseSchema = z.object({
   id: uuidSchema.optional(),
   listing_id: uuidSchema,
   landlord_id: uuidSchema,
@@ -244,7 +244,7 @@ const rentAgreementBaseSchema = z.object({
     .default('draft'),
 })
 
-export const rentAgreementInsertSchema = rentAgreementBaseSchema
+export const rentAgreementInsertSchema = rentAgreementInsertBaseSchema
   .refine(
     (data) =>
       data.end_date == null ||
@@ -252,7 +252,7 @@ export const rentAgreementInsertSchema = rentAgreementBaseSchema
     { message: 'End date must be after start date', path: ['end_date'] },
   )
 
-export const rentAgreementUpdateSchema = rentAgreementBaseSchema
+export const rentAgreementUpdateSchema = rentAgreementInsertBaseSchema
   .omit({ id: true, listing_id: true, landlord_id: true })
   .partial()
   .refine(
@@ -267,7 +267,7 @@ export const rentAgreementUpdateSchema = rentAgreementBaseSchema
 // Conversation Schemas
 // ──────────────────────────────────────────────────────────────
 
-const conversationBaseSchema = z.object({
+export const conversationInsertBaseSchema = z.object({
   id: uuidSchema.optional(),
   user1_id: uuidSchema,
   user2_id: uuidSchema,
@@ -277,7 +277,7 @@ const conversationBaseSchema = z.object({
   last_message_sender: uuidSchema.optional().nullable(),
 })
 
-export const conversationInsertSchema = conversationBaseSchema
+export const conversationInsertSchema = conversationInsertBaseSchema
   .refine((data) => data.user1_id !== data.user2_id, {
     message: 'Users cannot have a conversation with themselves',
     path: ['user2_id'],
@@ -287,7 +287,7 @@ export const conversationInsertSchema = conversationBaseSchema
     path: ['user1_id'],
   })
 
-export const conversationUpdateSchema = conversationBaseSchema
+export const conversationUpdateSchema = conversationInsertBaseSchema
   .omit({ id: true, user1_id: true, user2_id: true })
   .partial()
 

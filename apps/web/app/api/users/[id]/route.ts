@@ -1,12 +1,13 @@
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getUserId, successResponse, errorResponse } from "@/lib/api-utils";
-import { getServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { userUpdateSchema } from "@/lib/types/validation";
 import { getMockUserById } from "@/lib/mock/users";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  // Simulate artificial delay
+  // Simulate artificial delay for mock data
   await new Promise((resolve) => setTimeout(resolve, 800));
 
   const mockData = getMockUserById(id);
@@ -21,7 +22,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: idParam } = await params;
-    const supabase = await getServerClient();
+    const supabase = await createClient();
 
     let targetId: string | null = null;
     if (idParam === "me") {
@@ -64,5 +65,63 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return successResponse(updated);
   } catch (err) {
     return errorResponse("Internal server error", 500);
+  }
+}
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const supabase = await createClient();
+    
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    // Check if the user is updating their own profile
+    if (user.id !== id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const body = await request.json();
+
+    // Validate request body
+    const validationResult = userUpdateSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: validationResult.error.flatten() },
+        { status: 400 }
+      );
+    }
+    
+    // Update the user profile in the database
+    const { data, error } = await supabase
+      .from('users')
+      .update(validationResult.data)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to update user profile:', error);
+      return NextResponse.json(
+        { error: 'Failed to update profile' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Unexpected error in PUT /api/users/[id]:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

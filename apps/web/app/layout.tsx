@@ -8,6 +8,7 @@ import AuthProvider from "@/providers/AuthProvider";
 import FavoritesProvider from "@/components/FavoritesProvider";
 import ComparisonProvider from "@/components/ComparisonProvider";
 import ComparisonBar from "@/components/ComparisonBar";
+import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 import "@fontsource-variable/inter";
 
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </AuthProvider>
             </WalletProvider>
           </ServiceWorkerProvider>
+          <Toaster position="bottom-right" />
         </ThemeProvider>
       </body>
     </html>

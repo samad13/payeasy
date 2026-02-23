@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Keypair } from "stellar-sdk";
 import { generateChallenge } from "@/lib/auth/stellar-auth";
+import { logAuthEvent, AuthEventType } from "@/lib/security/authLogging";
 
 /**
  * POST /api/auth/login
@@ -9,9 +10,10 @@ import { generateChallenge } from "@/lib/auth/stellar-auth";
  * prove ownership of the corresponding private key.
  */
 export async function POST(request: Request) {
+    let publicKey: string | undefined;
     try {
         const body = await request.json();
-        const { publicKey } = body;
+        ({ publicKey } = body);
 
         if (!publicKey || typeof publicKey !== "string") {
             return NextResponse.json(
@@ -31,6 +33,14 @@ export async function POST(request: Request) {
         }
 
         const challenge = generateChallenge();
+
+        // Log challenge generation
+        await logAuthEvent({
+            publicKey,
+            eventType: AuthEventType.CHALLENGE_GENERATED,
+            status: "SUCCESS",
+            metadata: { nonce: challenge.nonce },
+        }, request);
 
         return NextResponse.json({
             success: true,

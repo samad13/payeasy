@@ -357,36 +357,36 @@ export default function FilterSidebar() {
               ...theme,
               colors: {
                 ...theme.colors,
-                primary: "#7D00FF",
+                primary: "var(--color-primary-500)",
               },
             })}
             styles={{
               control: (base, state) => ({
                 ...base,
-                borderColor: state.isFocused ? "#7D00FF" : "#E5E7EB",
-                boxShadow: state.isFocused ? "0 0 0 2px rgba(125, 0, 255, 0.2)" : "none",
+                borderColor: state.isFocused ? "var(--color-primary-500)" : "#E5E7EB",
+                boxShadow: state.isFocused ? "0 0 0 2px rgba(var(--color-primary-500), 0.2)" : "none",
                 borderRadius: "0.5rem",
                 minHeight: "42px",
                 "&:hover": {
-                  borderColor: state.isFocused ? "#7D00FF" : "#D1D5DB",
+                  borderColor: state.isFocused ? "var(--color-primary-500)" : "#D1D5DB",
                 },
               }),
               multiValue: (base) => ({
                 ...base,
-                backgroundColor: "#F3E8FF",
+                backgroundColor: "var(--color-primary-50)",
                 borderRadius: "0.25rem",
               }),
               multiValueLabel: (base) => ({
                 ...base,
-                color: "#7D00FF",
+                color: "var(--color-primary-500)",
                 fontWeight: 500,
               }),
               multiValueRemove: (base) => ({
                 ...base,
-                color: "#7D00FF",
+                color: "var(--color-primary-500)",
                 ":hover": {
-                  backgroundColor: "#E9D5FF",
-                  color: "#6B21A8",
+                  backgroundColor: "var(--color-primary-200)",
+                  color: "var(--color-primary-800)",
                 },
               }),
             }}

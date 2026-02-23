@@ -17,7 +17,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section - Mobile-first */}
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[200px] sm:before:h-[300px] before:w-[320px] sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-to-br before:from-transparent before:to-blue-700 before:opacity-10 after:absolute after:-z-20 after:h-[120px] sm:after:h-[180px] after:w-[160px] sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-to-t after:from-sky-900 after:via-[#7D00FF] after:opacity-40 after:blur-2xl after:content-[''] before:lg:h-[360px] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40">
+      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[200px] sm:before:h-[300px] before:w-[320px] sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-to-br before:from-transparent before:to-blue-700 before:opacity-10 after:absolute after:-z-20 after:h-[120px] sm:after:h-[180px] after:w-[160px] sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-to-t after:from-sky-900 after:via-[var(--color-primary-500)] after:opacity-40 after:blur-2xl after:content-[''] before:lg:h-[360px] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[var(--color-primary-500)] after:dark:opacity-40">
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tighter text-center">
           PayEasy
         </h1>

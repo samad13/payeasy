@@ -54,7 +54,7 @@ export default function PaymentPage() {
   const params = useParams();
   const id = (typeof params?.id === 'string' ? params.id : params?.id?.[0]) ?? '';
   const router = useRouter();
-  
+
   // State
   const [listing, setListing] = useState(MOCK_LISTING);
   const [status, setStatus] = useState<"idle" | "connecting" | "signing" | "processing" | "success" | "failed">("idle");
@@ -88,7 +88,7 @@ export default function PaymentPage() {
         try {
           const { getNetworkTransactionStatus } = await import("@/lib/stellar/contract-transactions");
           const result = await getNetworkTransactionStatus(txHash);
-          
+
           if (result.status === "success") {
             setStatus("success");
             clearInterval(intervalId);
@@ -120,7 +120,7 @@ export default function PaymentPage() {
         await connect();
       }
 
-      
+
       // Fetch fee estimate
       setIsEstimatingFee(true);
       try {
@@ -138,7 +138,7 @@ export default function PaymentPage() {
             network: networkConfig.name,
           }),
         });
-        
+
         if (res.ok) {
           const data = await res.json();
           setFeeDetails(data);
@@ -181,9 +181,9 @@ export default function PaymentPage() {
       );
 
       if (result.status === "FAILED" || result.status === "failed") {
-         throw new Error("Transaction submission failed: " + (result.errorResultXdr || "Unknown error"));
+        throw new Error("Transaction submission failed: " + (result.errorResultXdr || "Unknown error"));
       }
-      
+
       const hash = result.txHash;
       setTxHash(hash);
       setStatus("processing");
@@ -205,12 +205,12 @@ export default function PaymentPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ listingId, amount, txHash: hash }),
     });
-    
+
     if (!res.ok) {
-        const err = await res.json();
-        // Don't throw here, just log, because transaction is already submitted
-        console.error("Failed to save payment record:", err);
-        return { id: null };
+      const err = await res.json();
+      // Don't throw here, just log, because transaction is already submitted
+      console.error("Failed to save payment record:", err);
+      return { id: null };
     }
     return res.json();
   };
@@ -232,7 +232,7 @@ export default function PaymentPage() {
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
         <div className="w-full max-w-md bg-[#1E1E2E] border border-white/10 rounded-2xl p-6 shadow-2xl scale-100">
           <h3 className="text-xl font-semibold text-white mb-4">Confirm Payment</h3>
-          
+
           <div className="space-y-4 mb-6">
             <div className="flex justify-between text-sm">
               <span className="text-gray-400">Amount</span>
@@ -257,8 +257,8 @@ export default function PaymentPage() {
             <div className="flex justify-between text-sm border-t border-white/10 pt-4">
               <span className="text-gray-400">Total Payment</span>
               <span className="text-xl font-bold text-indigo-400">
-                {(BigInt(listing.shareAmount * 10_000_000) + BigInt(feeDetails?.totalFee ?? 100)) / 10_000_000n === BigInt(listing.shareAmount) 
-                  ? listing.shareAmount 
+                {(BigInt(listing.shareAmount * 10_000_000) + BigInt(feeDetails?.totalFee ?? 100)) / 10_000_000n === BigInt(listing.shareAmount)
+                  ? listing.shareAmount
                   : Number(BigInt(listing.shareAmount * 10_000_000) + BigInt(feeDetails?.totalFee ?? 100)) / 10_000_000}{" "}
                 XLM
               </span>
@@ -266,10 +266,10 @@ export default function PaymentPage() {
           </div>
 
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-6">
-             <p className="text-xs text-yellow-200 flex items-start gap-2">
-               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-               <span>You will be asked to sign a transaction with your <strong>Freighter wallet</strong>. Please verify the amount and destination.</span>
-             </p>
+            <p className="text-xs text-yellow-200 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>You will be asked to sign a transaction with your <strong>Freighter wallet</strong>. Please verify the amount and destination.</span>
+            </p>
           </div>
 
           <div className="flex gap-3">
@@ -294,20 +294,20 @@ export default function PaymentPage() {
   return (
     <div className="min-h-screen bg-[#0F0F13] text-white p-4 md:p-8 font-sans">
       {renderConfirmationModal()}
-      
+
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 flex justify-between items-end">
           <div>
             <Link href={`/listings/${id}`} className="text-sm text-gray-400 hover:text-white mb-4 inline-flex items-center gap-1 transition-colors">
-               <ArrowRight className="w-4 h-4 rotate-180" /> Back to Listing
+              <ArrowRight className="w-4 h-4 rotate-180" /> Back to Listing
             </Link>
             <h1 className="text-3xl font-bold tracking-tight">Pay Rent</h1>
             <p className="text-gray-400 mt-2">Securely pay your rent using Stellar smart contracts.</p>
           </div>
           <div className="hidden md:block">
-             <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-gray-400">
-               Network: <span className={networkName === "Mainnet" ? "text-green-400" : "text-yellow-400"}>{networkName}</span>
-             </span>
+            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-gray-400">
+              Network: <span className={networkName === "Mainnet" ? "text-green-400" : "text-yellow-400"}>{networkName}</span>
+            </span>
           </div>
         </div>
 
@@ -319,13 +319,13 @@ export default function PaymentPage() {
                 <Wallet className="w-5 h-5 text-indigo-400" />
                 Payment Details
               </h2>
-              
+
               <div className="space-y-6">
                 <div className="flex justify-between items-center py-4 border-b border-white/5">
                   <span className="text-gray-400">Listing</span>
                   <span className="font-medium text-right text-gray-200">{listing.title}</span>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-4 border-b border-white/5">
                   <span className="text-gray-400">Contract Address</span>
                   <span className="font-mono text-xs bg-white/5 px-2 py-1 rounded text-gray-400 truncate max-w-[180px] md:max-w-[300px]" title={listing.contractAddress}>
@@ -362,30 +362,30 @@ export default function PaymentPage() {
               {/* Action Button */}
               <div className="mt-8">
                 {status === "success" ? (
-                   <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6 text-center animate-in zoom-in duration-300">
-                     <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <CheckCircle2 className="w-8 h-8 text-green-500" />
-                     </div>
-                     <h3 className="text-xl text-green-400 font-semibold mb-2">Payment Successful!</h3>
-                     <p className="text-sm text-green-400/60 mb-6">Your rent has been paid successfully and recorded on the blockchain.</p>
-                     
-                     <div className="flex justify-center gap-4">
-                       <a 
-                         href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
-                         target="_blank" 
-                         rel="noopener noreferrer"
-                         className="px-4 py-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors text-sm font-medium flex items-center gap-2"
-                       >
-                         View on Explorer <ExternalLink className="w-3 h-3" />
-                       </a>
-                       <Link
-                         href={`/listings/${id}`}
-                         className="px-4 py-2 rounded-lg border border-green-500/30 text-green-400 hover:bg-green-500/10 transition-colors text-sm font-medium"
-                       >
-                         Return to Listing
-                       </Link>
-                     </div>
-                   </div>
+                  <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6 text-center animate-in zoom-in duration-300">
+                    <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle2 className="w-8 h-8 text-green-500" />
+                    </div>
+                    <h3 className="text-xl text-green-400 font-semibold mb-2">Payment Successful!</h3>
+                    <p className="text-sm text-green-400/60 mb-6">Your rent has been paid successfully and recorded on the blockchain.</p>
+
+                    <div className="flex justify-center gap-4">
+                      <a
+                        href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors text-sm font-medium flex items-center gap-2"
+                      >
+                        View on Explorer <ExternalLink className="w-3 h-3" />
+                      </a>
+                      <Link
+                        href={`/listings/${id}`}
+                        className="px-4 py-2 rounded-lg border border-green-500/30 text-green-400 hover:bg-green-500/10 transition-colors text-sm font-medium"
+                      >
+                        Return to Listing
+                      </Link>
+                    </div>
+                  </div>
                 ) : (
                   <div className="space-y-4">
                     <button
@@ -394,7 +394,7 @@ export default function PaymentPage() {
                       className={`
                         w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all
                         ${status === "idle" || status === "failed"
-                          ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/30 hover:-translate-y-0.5" 
+                          ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/30 hover:-translate-y-0.5"
                           : "bg-gray-800 text-gray-500 cursor-not-allowed"}
                       `}
                     >
@@ -404,26 +404,26 @@ export default function PaymentPage() {
                         </>
                       )}
                       {status === "connecting" && (
-                         <>
-                           <Loader2 className="w-5 h-5 animate-spin" />
-                           Connecting Wallet...
-                         </>
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Connecting Wallet...
+                        </>
                       )}
                       {status === "signing" && (
-                         <>
-                           <Loader2 className="w-5 h-5 animate-spin" />
-                           Check Wallet to Sign...
-                         </>
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Check Wallet to Sign...
+                        </>
                       )}
                       {status === "processing" && (
-                         <>
-                           <Loader2 className="w-5 h-5 animate-spin" />
-                           Processing Transaction...
-                         </>
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Processing Transaction...
+                        </>
                       )}
                       {status === "failed" && "Retry Payment"}
                     </button>
-                    
+
                     {status === "failed" && error && (
                       <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400 text-center animate-in fade-in slide-in-from-top-2">
                         <p className="font-semibold mb-1">Payment Failed</p>
@@ -444,14 +444,14 @@ export default function PaymentPage() {
                 <span className="text-gray-400 text-sm">Status</span>
                 <StatusBadge status={status === "idle" ? "Pending" : status} />
               </div>
-              
+
               {txHash && (
                 <div className="mt-4 pt-4 border-t border-white/5">
                   <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Transaction Hash</p>
-                  <a 
+                  <a
                     href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
                     target="_blank"
-                    rel="noopener noreferrer" 
+                    rel="noopener noreferrer"
                     className="text-xs text-indigo-400 hover:text-indigo-300 break-all flex items-start gap-1 p-2 bg-indigo-500/5 rounded border border-indigo-500/10 transition-colors hover:bg-indigo-500/10"
                   >
                     <span className="font-mono">{txHash}</span>

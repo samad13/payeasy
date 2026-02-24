@@ -1,16 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+const vi = jest;
 import { GET } from './route';
 
-vi.mock('@/lib/supabase/admin', () => ({
-    createAdminClient: vi.fn(),
+jest.mock('@/lib/supabase/admin', () => ({
+    createAdminClient: jest.fn(),
 }));
 
-vi.mock('@/lib/api-utils', () => ({
-    getUserId: vi.fn(),
-    errorResponse: (message: string, status?: number) => ({
-        json: async () => ({ success: false, error: { message } }),
-        status: status || 400,
-    }),
+jest.mock('@/lib/api-utils', () => ({
+    ...jest.requireActual('@/lib/api-utils'),
+    getUserId: jest.fn(),
 }));
 
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -21,10 +18,10 @@ describe('GET /api/users/export', () => {
     let mockRequest: any;
 
     beforeEach(() => {
-        vi.clearAllMocks();
+        jest.clearAllMocks();
 
         mockSupabase = {
-            from: vi.fn(),
+            from: jest.fn(),
         };
 
         mockRequest = {
@@ -46,11 +43,11 @@ describe('GET /api/users/export', () => {
         (getUserId as any).mockReturnValue('pub_key_123');
 
         // Mocks for supabase chaining
-        const eqMock = vi.fn();
-        const singleMock = vi.fn();
-        const selectMock = vi.fn();
-        const orMock = vi.fn();
-        const insertMock = vi.fn();
+        const eqMock = jest.fn();
+        const singleMock = jest.fn();
+        const selectMock = jest.fn();
+        const orMock = jest.fn();
+        const insertMock = jest.fn();
 
         mockSupabase.from.mockReturnValue({
             select: selectMock,
@@ -90,11 +87,11 @@ describe('GET /api/users/export', () => {
         (getUserId as any).mockReturnValue('pub_key_123');
         mockRequest.url = 'http://localhost/api/users/export?format=csv';
 
-        const eqMock = vi.fn();
-        const singleMock = vi.fn();
-        const selectMock = vi.fn();
-        const orMock = vi.fn();
-        const insertMock = vi.fn();
+        const eqMock = jest.fn();
+        const singleMock = jest.fn();
+        const selectMock = jest.fn();
+        const orMock = jest.fn();
+        const insertMock = jest.fn();
 
         mockSupabase.from.mockReturnValue({ select: selectMock, insert: insertMock });
         selectMock.mockReturnValue({ eq: eqMock, or: orMock });

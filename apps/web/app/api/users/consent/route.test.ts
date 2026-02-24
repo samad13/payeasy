@@ -1,17 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+const vi = jest;
 import { GET, POST, DELETE } from './route';
 
-vi.mock('@/lib/supabase/admin', () => ({
-    createAdminClient: vi.fn(),
+jest.mock('@/lib/supabase/admin', () => ({
+    createAdminClient: jest.fn(),
 }));
 
-vi.mock('@/lib/api-utils', () => ({
-    getUserId: vi.fn(),
-    successResponse: (data: any) => ({ json: async () => ({ success: true, data }), status: 200 }),
-    errorResponse: (message: string, status?: number) => ({
-        json: async () => ({ success: false, error: { message } }),
-        status: status || 400,
-    }),
+jest.mock('@/lib/api-utils', () => ({
+    ...jest.requireActual('@/lib/api-utils'),
+    getUserId: jest.fn(),
 }));
 
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -22,10 +18,10 @@ describe('/api/users/consent', () => {
     let mockRequest: any;
 
     beforeEach(() => {
-        vi.clearAllMocks();
+        jest.clearAllMocks();
         mockRequest = {
             headers: new Headers(),
-            json: vi.fn(),
+            json: jest.fn(),
             ip: '127.0.0.1'
         };
         mockRequest.headers.set('x-forwarded-for', '127.0.0.1');
@@ -33,11 +29,11 @@ describe('/api/users/consent', () => {
 
     const setupMockSupabase = () => {
         const defaultData = { id: 'user-123' };
-        const eqMock = vi.fn();
-        const singleMock = vi.fn();
-        const selectMock = vi.fn();
-        const insertMock = vi.fn();
-        const orderMock = vi.fn();
+        const eqMock = jest.fn();
+        const singleMock = jest.fn();
+        const selectMock = jest.fn();
+        const insertMock = jest.fn();
+        const orderMock = jest.fn();
 
         const dbClient = {
             select: selectMock,
@@ -48,7 +44,7 @@ describe('/api/users/consent', () => {
         };
 
         mockSupabase = {
-            from: vi.fn(() => dbClient),
+            from: jest.fn(() => dbClient),
         };
 
         selectMock.mockReturnValue(dbClient);

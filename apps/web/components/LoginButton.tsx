@@ -105,6 +105,7 @@ export default function LoginButton() {
 
             // Optionally reload the page so protected routes become accessible
             setTimeout(() => router.refresh(), 1000);
+            setTimeout(() => window.location.reload(), 1000);
         } catch (err: unknown) {
             setState("error");
             setError(

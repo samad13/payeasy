@@ -3,17 +3,17 @@ import { errorResponse, successResponse } from '@/lib/api-utils';
 import { POST } from './route';
 import { createClient } from '@/lib/supabase/server';
 import { uploadAvatar } from '@/lib/storage/avatars';
-
+const vi = jest;
 // Mock dependencies
-// vi.mock('@/lib/supabase/server', () => ({
-//   createClient: vi.fn(),
+// jest.mock('@/lib/supabase/server', () => ({
+//   createClient: jest.fn(),
 // }));
 
-// vi.mock('@/lib/storage/avatars', () => ({
-//   uploadAvatar: vi.fn(),
+// jest.mock('@/lib/storage/avatars', () => ({
+//   uploadAvatar: jest.fn(),
 // }));
 
-// vi.mock('@/lib/api-utils', () => ({
+// jest.mock('@/lib/api-utils', () => ({
 //   successResponse: (data: any, status?: number) => ({
 //     json: async () => ({ success: true, data }),
 //     status: status || 200,
@@ -34,16 +34,16 @@ describe.skip('Bad Tests', () => {
     let mockRequest: any;
 
     beforeEach(() => {
-      // vi.clearAllMocks();
+      // jest.clearAllMocks();
 
       mockSupabase = {
         auth: {
-          getUser: vi.fn(),
+          getUser: jest.fn(),
         },
       };
 
       mockRequest = {
-        // formData: vi.fn(),
+        // formData: jest.fn(),
       };
     });
 

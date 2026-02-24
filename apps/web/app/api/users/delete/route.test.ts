@@ -1,22 +1,18 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+const vi = jest;
 import { DELETE } from './route';
 
-vi.mock('@/lib/supabase/admin', () => ({
-    createAdminClient: vi.fn(),
+jest.mock('@/lib/supabase/admin', () => ({
+    createAdminClient: jest.fn(),
 }));
 
-vi.mock('@/lib/api-utils', () => ({
-    getUserId: vi.fn(),
-    successResponse: (data: any) => ({ json: async () => ({ success: true, data }), status: 200 }),
-    errorResponse: (message: string, status?: number) => ({
-        json: async () => ({ success: false, error: { message } }),
-        status: status || 400,
-    }),
+jest.mock('@/lib/api-utils', () => ({
+    ...jest.requireActual('@/lib/api-utils'),
+    getUserId: jest.fn(),
 }));
 
-vi.mock('@/lib/email', () => ({
-    sendEmail: vi.fn(),
-    getAccountDeletionEmailTemplate: vi.fn(() => 'test_template'),
+jest.mock('@/lib/email', () => ({
+    sendEmail: jest.fn(),
+    getAccountDeletionEmailTemplate: jest.fn(() => 'test_template'),
 }));
 
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -28,7 +24,7 @@ describe('DELETE /api/users/delete', () => {
     let mockRequest: any;
 
     beforeEach(() => {
-        vi.clearAllMocks();
+        jest.clearAllMocks();
         mockRequest = { headers: new Headers() };
     });
 
@@ -43,23 +39,23 @@ describe('DELETE /api/users/delete', () => {
         (getUserId as any).mockReturnValue('pub_key_123');
 
         // Mocks for delete chaining
-        const orMock = vi.fn().mockResolvedValue({ error: null });
-        const deleteEqMock = vi.fn().mockResolvedValue({ error: null });
+        const orMock = jest.fn().mockResolvedValue({ error: null });
+        const deleteEqMock = jest.fn().mockResolvedValue({ error: null });
 
-        const deleteMock = vi.fn().mockReturnValue({
+        const deleteMock = jest.fn().mockReturnValue({
             eq: deleteEqMock,
             or: orMock,
         });
 
         // Mocks for select chaining
-        const singleMock = vi.fn().mockResolvedValue({ data: { id: 'user-123', email: 'test@test.com' }, error: null });
-        const selectEqMock = vi.fn().mockReturnValue({ single: singleMock });
-        const selectMock = vi.fn().mockReturnValue({ eq: selectEqMock });
+        const singleMock = jest.fn().mockResolvedValue({ data: { id: 'user-123', email: 'test@test.com' }, error: null });
+        const selectEqMock = jest.fn().mockReturnValue({ single: singleMock });
+        const selectMock = jest.fn().mockReturnValue({ eq: selectEqMock });
 
-        const insertMock = vi.fn().mockResolvedValue({ error: null });
+        const insertMock = jest.fn().mockResolvedValue({ error: null });
 
         mockSupabase = {
-            from: vi.fn((table: string) => ({
+            from: jest.fn((table: string) => ({
                 select: selectMock,
                 insert: insertMock,
                 delete: deleteMock,

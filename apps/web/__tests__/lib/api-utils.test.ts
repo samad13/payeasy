@@ -2,10 +2,6 @@ import { NextRequest } from 'next/server';
 import { successResponse, errorResponse, getUserId } from '@/lib/api-utils';
 import { verifyJwt } from '@/lib/auth/stellar-auth';
 
-// Add globals that next/server expects in Next 14+ when imported outside Next runtime
-global.Response = class Response {
-    static json = jest.fn()
-} as any;
 global.Request = class Request { } as any;
 
 jest.mock('@/lib/auth/stellar-auth', () => ({
@@ -13,57 +9,47 @@ jest.mock('@/lib/auth/stellar-auth', () => ({
 }));
 
 describe('api-utils', () => {
-    let responseJsonSpy: jest.SpyInstance;
-
     beforeEach(() => {
         jest.clearAllMocks();
-        responseJsonSpy = jest.spyOn(Response, 'json');
-    });
-
-    afterEach(() => {
-        responseJsonSpy.mockRestore();
     });
 
     describe('successResponse', () => {
-        it('returns a successful JSON response with default 200 status', () => {
+        it('returns a successful JSON response with default 200 status', async () => {
             const data = { foo: 'bar' };
             const response = successResponse(data);
-            expect(responseJsonSpy).toHaveBeenCalledWith(
-                { success: true, data },
-                { status: 200 }
-            );
-            // Since we mocked Response.json directly, it won't return an actual Response
-            // but we can at least assert it was called correctly.
+
+            expect(response.status).toBe(200);
+            expect(response.headers.get('Content-Type')).toBe('application/json');
+
+            const json = await response.json();
+            expect(json).toEqual({ success: true, data });
         });
 
-        it('returns a successful JSON response with custom status', () => {
+        it('returns a successful JSON response with custom status', async () => {
             const data = { created: true };
-            successResponse(data, 201);
+            const response = successResponse(data, 201);
 
-            expect(responseJsonSpy).toHaveBeenCalledWith(
-                { success: true, data },
-                { status: 201 }
-            );
+            expect(response.status).toBe(201);
+            const json = await response.json();
+            expect(json).toEqual({ success: true, data });
         });
     });
 
     describe('errorResponse', () => {
-        it('returns an error JSON response with default 400 status', () => {
+        it('returns an error JSON response with default 400 status', async () => {
             const response = errorResponse('Bad Request');
 
-            expect(responseJsonSpy).toHaveBeenCalledWith(
-                { success: false, error: { message: 'Bad Request' } },
-                { status: 400 }
-            );
+            expect(response.status).toBe(400);
+            const json = await response.json();
+            expect(json).toEqual({ success: false, error: { message: 'Bad Request' } });
         });
 
-        it('includes a custom code if provided', () => {
-            errorResponse('Not Found', 404, 'ERR_NOT_FOUND');
+        it('includes a custom code if provided', async () => {
+            const response = errorResponse('Not Found', 404, 'ERR_NOT_FOUND');
 
-            expect(responseJsonSpy).toHaveBeenCalledWith(
-                { success: false, error: { message: 'Not Found', code: 'ERR_NOT_FOUND' } },
-                { status: 404 }
-            );
+            expect(response.status).toBe(404);
+            const json = await response.json();
+            expect(json).toEqual({ success: false, error: { message: 'Not Found', code: 'ERR_NOT_FOUND' } });
         });
     });
 

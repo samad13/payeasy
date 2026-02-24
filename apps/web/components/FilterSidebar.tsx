@@ -6,7 +6,9 @@ import * as Slider from "@radix-ui/react-slider";
 import Select, { MultiValue, ActionMeta } from "react-select";
 import debounce from "lodash.debounce";
 import Link from "next/link";
-import { X, List } from "lucide-react";
+import { X, List, Bookmark, ChevronDown } from "lucide-react";
+import SaveSearchModal from "./SaveSearchModal";
+import SavedSearchesList from "./SavedSearchesList";
 
 // Types
 type FilterState = {
@@ -73,6 +75,8 @@ export default function FilterSidebar() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showSavedList, setShowSavedList] = useState(false);
 
   // Local state for autocomplete
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -207,7 +211,36 @@ export default function FilterSidebar() {
     (s) => s.toLowerCase().includes(filters.location.toLowerCase()) && s !== filters.location
   );
 
+  const currentFiltersAsRecord: Record<string, unknown> = {
+    ...(filters.minPrice > 0 ? { minPrice: filters.minPrice } : {}),
+    ...(filters.maxPrice < 5000 ? { maxPrice: filters.maxPrice } : {}),
+    ...(filters.bedrooms ? { bedrooms: filters.bedrooms } : {}),
+    ...(filters.bathrooms ? { bathrooms: filters.bathrooms } : {}),
+    ...(filters.furnished ? { furnished: true } : {}),
+    ...(filters.petFriendly ? { petFriendly: true } : {}),
+    ...(filters.amenities.length > 0 ? { amenities: filters.amenities } : {}),
+    ...(filters.location ? { location: filters.location } : {}),
+  };
+
+  const handleRerun = (savedFilters: Record<string, unknown>) => {
+    const params = new URLSearchParams();
+    Object.entries(savedFilters).forEach(([k, v]) => {
+      if (Array.isArray(v)) params.set(k, v.join(","));
+      else if (v !== null && v !== undefined) params.set(k, String(v));
+    });
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    setShowSavedList(false);
+  };
+
   return (
+    <>
+    {showSaveModal && (
+      <SaveSearchModal
+        currentFilters={currentFiltersAsRecord}
+        onClose={() => setShowSaveModal(false)}
+        onSaved={() => setShowSavedList(true)}
+      />
+    )}
     <div className="h-fit w-full max-w-sm rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-900">Filters</h2>
@@ -426,6 +459,26 @@ export default function FilterSidebar() {
           </label>
         </div>
       </div>
+
+      {/* Save Search & Saved Searches */}
+      <div className="mt-6 space-y-3 border-t border-gray-100 pt-5">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowSaveModal(true)}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+          >
+            <Bookmark size={14} /> Save search
+          </button>
+          <button
+            onClick={() => setShowSavedList((v) => !v)}
+            className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50"
+          >
+            Saved <ChevronDown size={14} className={`transition-transform ${showSavedList ? "rotate-180" : ""}`} />
+          </button>
+        </div>
+        {showSavedList && <SavedSearchesList onRerun={handleRerun} />}
+      </div>
     </div>
+    </>
   );
 }

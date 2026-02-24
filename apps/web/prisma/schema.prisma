@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Listing {
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  address      String
+  rent_xlm     Float
+  bedrooms     Int
+  bathrooms    Int
+  furnished    Boolean
+  pet_friendly Boolean
+  amenities    String[]
+  status       String   @default("active")
+  landlord_id  String
+  created_at   DateTime @default(now())
+
+  @@map("listings")
+}

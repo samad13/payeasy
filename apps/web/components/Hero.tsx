@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 export type HeroHeight = 'sm' | 'md' | 'lg' | 'screen'
 export type HeroAlign = 'left' | 'center' | 'right'
 
-export interface HeroProps extends React.HTMLAttributes<HTMLElement> {
+export interface HeroProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
   title: React.ReactNode
   subtitle?: React.ReactNode
   eyebrow?: React.ReactNode

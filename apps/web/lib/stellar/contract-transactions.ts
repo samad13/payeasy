@@ -42,7 +42,7 @@ export type BuiltContractTransaction = {
   network: StellarNetworkName;
   networkPassphrase: string;
   rpcUrl: string;
-  feeStats?: Record<string, unknown>;
+  feeStats?: any;
 };
 
 export type SubmittedTransaction = {
@@ -195,10 +195,9 @@ export async function buildContractTransaction(
 
   const args = (params.args ?? []).map((arg) => toScValArgument(arg));
 
-
-  let feeStats: Record<string, unknown> | undefined;
+  let feeStats: any | undefined;
   try {
-    feeStats = await (server as unknown as { getFeeStats: () => Promise<Record<string, unknown>> }).getFeeStats();
+    feeStats = await (server as any).getFeeStats();
   } catch (e) {
     console.warn("Failed to fetch fee stats, using default base fee", e);
   }

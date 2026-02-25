@@ -1,6 +1,11 @@
-import { NextResponse } from "next/server";
+import { Request } from "next/server";
 import { Keypair } from "stellar-sdk";
 import { generateChallenge } from "@/lib/auth/stellar-auth";
+import {
+  successResponse,
+  errorResponse,
+  handleError,
+} from "@/app/api/utils/response";
 import { logAuthEvent, AuthEventType } from "@/lib/security/authLogging";
 
 /**
@@ -10,66 +15,40 @@ import { logAuthEvent, AuthEventType } from "@/lib/security/authLogging";
  * prove ownership of the corresponding private key.
  */
 export async function POST(request: Request) {
-    let publicKey: string | undefined;
-    try {
-        const body = await request.json();
-        ({ publicKey } = body);
+  const requestId = request.headers.get("x-request-id") ?? undefined;
+  let publicKey: string | undefined;
 
-        if (!publicKey || typeof publicKey !== "string") {
-            return NextResponse.json(
-                { 
-                    success: false, 
-                    error: { 
-                        code: "MISSING_FIELD",
-                        message: "publicKey is required",
-                        field: "publicKey"
-                    } 
-                },
-                { status: 400 }
-            );
-        }
+  try {
+    const body = await request.json().catch(() => null);
 
-        // Validate that the public key is well-formed
-        try {
-            Keypair.fromPublicKey(publicKey);
-        } catch {
-            return NextResponse.json(
-                { 
-                    success: false, 
-                    error: { 
-                        code: "INVALID_PUBLIC_KEY",
-                        message: "Invalid Stellar public key",
-                        field: "publicKey"
-                    } 
-                },
-                { status: 400 }
-            );
-        }
-
-        const challenge = generateChallenge();
-
-        // Log challenge generation
-        await logAuthEvent({
-            publicKey,
-            eventType: AuthEventType.CHALLENGE_GENERATED,
-            status: "SUCCESS",
-            metadata: { nonce: challenge.nonce },
-        }, request);
-
-        return NextResponse.json({
-            success: true,
-            data: challenge,
-        });
-    } catch {
-        return NextResponse.json(
-            { 
-                success: false, 
-                error: { 
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Internal server error" 
-                } 
-            },
-            { status: 500 }
-        );
+    if (!body || typeof body.publicKey !== "string") {
+      return errorResponse("publicKey is required", 400);
     }
+
+    publicKey = body.publicKey;
+
+    // Validate Stellar public key format
+    try {
+      Keypair.fromPublicKey(publicKey);
+    } catch {
+      return errorResponse("Invalid Stellar public key", 400);
+    }
+
+    const challenge = generateChallenge();
+
+    // Log challenge generation
+    await logAuthEvent(
+      {
+        publicKey,
+        eventType: AuthEventType.CHALLENGE_GENERATED,
+        status: "SUCCESS",
+        metadata: { nonce: challenge.nonce },
+      },
+      request
+    );
+
+    return successResponse(challenge);
+  } catch (err) {
+    return handleError(err, requestId);
+  }
 }

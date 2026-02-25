@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 
 export type BannerVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger'
 
-export interface BannerProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface BannerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   title: React.ReactNode
   description?: React.ReactNode
   eyebrow?: React.ReactNode

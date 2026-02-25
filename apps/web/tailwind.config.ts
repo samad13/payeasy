@@ -2,6 +2,7 @@ import type { Config } from "tailwindcss/types";
 import defaultTheme from "tailwindcss/defaultTheme";
 
 const config: Config = {
+  darkMode: "class",
   content: ["./app/**/*.{js,ts,jsx,tsx,mdx}", "./components/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     // Mobile-first breakpoints (Tailwind default is already mobile-first)
@@ -113,7 +114,7 @@ const config: Config = {
           900: '#0C4A6E',
         },
       },
-      
+
       // ============================================
       // TYPOGRAPHY SYSTEM
       // ============================================
@@ -122,7 +123,7 @@ const config: Config = {
         'display-2xl': ['4.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '700' }],  // 72px
         'display-xl': ['3.75rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '700' }],  // 60px
         'display-lg': ['3rem', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '700' }],     // 48px
-        
+
         // Headings
         'h1': ['2.25rem', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '700' }],  // 36px
         'h2': ['1.875rem', { lineHeight: '1.3', letterSpacing: '-0.01em', fontWeight: '700' }], // 30px
@@ -130,21 +131,21 @@ const config: Config = {
         'h4': ['1.25rem', { lineHeight: '1.4', letterSpacing: '0', fontWeight: '600' }],        // 20px
         'h5': ['1.125rem', { lineHeight: '1.4', letterSpacing: '0', fontWeight: '600' }],       // 18px
         'h6': ['1rem', { lineHeight: '1.5', letterSpacing: '0', fontWeight: '600' }],           // 16px
-        
+
         // Body Text
         'body-xl': ['1.25rem', { lineHeight: '1.6', letterSpacing: '0', fontWeight: '400' }],   // 20px
         'body-lg': ['1.125rem', { lineHeight: '1.6', letterSpacing: '0', fontWeight: '400' }],  // 18px
         'body-base': ['1rem', { lineHeight: '1.6', letterSpacing: '0', fontWeight: '400' }],    // 16px
         'body-sm': ['0.875rem', { lineHeight: '1.5', letterSpacing: '0', fontWeight: '400' }],  // 14px
         'body-xs': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.01em', fontWeight: '400' }], // 12px
-        
+
         // Mobile-optimized typography (preserved from existing config)
         'xs-mobile': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.01em' }],
         'sm-mobile': ['0.875rem', { lineHeight: '1.5', letterSpacing: '0.01em' }],
         'base-mobile': ['1rem', { lineHeight: '1.6', letterSpacing: '0.01em' }],
         'lg-mobile': ['1.125rem', { lineHeight: '1.6', letterSpacing: '0' }],
       },
-      
+
       fontWeight: {
         normal: '400',
         medium: '500',
@@ -152,7 +153,7 @@ const config: Config = {
         bold: '700',
         extrabold: '800',
       },
-      
+
       // ============================================
       // SPACING SYSTEM (4px base)
       // ============================================
@@ -192,7 +193,7 @@ const config: Config = {
         '72': '18rem',      // 288px
         '80': '20rem',      // 320px
         '96': '24rem',      // 384px
-        
+
         // Touch-friendly spacing (preserved from existing config)
         'touch': '48px',      // Minimum touch target size (WCAG AAA)
         'touch-sm': '44px',   // Small touch target (WCAG AA)
@@ -201,7 +202,7 @@ const config: Config = {
         'safe-left': 'env(safe-area-inset-left)',
         'safe-right': 'env(safe-area-inset-right)',
       },
-      
+
       // ============================================
       // SHADOW SYSTEM
       // ============================================
@@ -214,26 +215,26 @@ const config: Config = {
         'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
         'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
         '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        
+
         // Colored shadows
         'primary': '0 10px 15px -3px rgba(125, 0, 255, 0.2), 0 4px 6px -4px rgba(125, 0, 255, 0.1)',
         'accent': '0 10px 15px -3px rgba(49, 120, 198, 0.2), 0 4px 6px -4px rgba(49, 120, 198, 0.1)',
-        
+
         // Inner shadows
         'inner': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
         'inner-lg': 'inset 0 4px 8px 0 rgba(0, 0, 0, 0.1)',
-        
+
         // Mobile-friendly shadows (preserved from existing config)
         'mobile': '0 2px 8px rgba(0, 0, 0, 0.1)',
         'mobile-lg': '0 4px 16px rgba(0, 0, 0, 0.15)',
-        
+
         // Focus rings for accessibility
         'focus': '0 0 0 3px rgba(125, 0, 255, 0.3)',
         'focus-accent': '0 0 0 3px rgba(49, 120, 198, 0.3)',
-        
+
         'none': 'none',
       },
-      
+
       // ============================================
       // BORDER RADIUS SYSTEM
       // ============================================
@@ -248,7 +249,7 @@ const config: Config = {
         '3xl': '1.5rem',    // 24px
         'full': '9999px',   // Fully rounded
       },
-      
+
       // ============================================
       // ANIMATION & MOTION SYSTEM
       // ============================================
@@ -262,7 +263,7 @@ const config: Config = {
         'slower': '500ms',
         'slowest': '700ms',
       },
-      
+
       // Easing functions
       transitionTimingFunction: {
         'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -270,7 +271,7 @@ const config: Config = {
         'ease-out-smooth': 'cubic-bezier(0, 0, 0.2, 1)',
         'bounce': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
       },
-      
+
       // Animation (preserved and extended from existing config)
       animation: {
         // Slide animations
@@ -278,25 +279,24 @@ const config: Config = {
         'slide-down': 'slideDown 0.3s ease-out',
         'slide-in-right': 'slideInRight 0.3s ease-out',
         'slide-in-left': 'slideInLeft 0.3s ease-out',
-        
+
         // Fade animations
         'fade-in': 'fadeIn 0.2s ease-out',
         'fade-out': 'fadeOut 0.2s ease-out',
         'fade-in-up': 'fadeInUp 0.3s ease-out',
         'fade-in-down': 'fadeInDown 0.3s ease-out',
-        
+
         // Scale animations
         'scale-in': 'scaleIn 0.2s ease-out',
         'scale-out': 'scaleOut 0.2s ease-out',
-        
+
         // Utility animations
         'spin-slow': 'spin 3s linear infinite',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'bounce-slow': 'bounce 2s infinite',
-        'slide-in-right': 'slideInRight 0.3s ease-out',
         'shimmer': 'shimmer 2s ease-in-out infinite',
       },
-      
+
       keyframes: {
         slideUp: {
           '0%': { transform: 'translateY(100%)', opacity: '0' },
@@ -343,7 +343,7 @@ const config: Config = {
           '100%': { backgroundPosition: '200% 0' },
         },
       },
-      
+
       // ============================================
       // RESPONSIVE & SAFE AREAS
       // ============================================
@@ -353,7 +353,7 @@ const config: Config = {
       maxHeight: {
         'screen-safe': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
       },
-      
+
       // ============================================
       // Z-INDEX SYSTEM
       // ============================================

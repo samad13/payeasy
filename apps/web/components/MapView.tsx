@@ -277,8 +277,8 @@ export default function MapView({
                     >
                         <div
                             className={`cursor-pointer px-2 py-1 rounded-lg text-xs font-bold shadow-md transition-all hover:scale-110 whitespace-nowrap ${selectedListing?.id === listing.id
-                                    ? 'bg-primary text-white scale-110'
-                                    : 'bg-white text-primary border border-gray-200'
+                                ? 'bg-primary text-white scale-110'
+                                : 'bg-white text-primary border border-gray-200'
                                 }`}
                             onClick={() => {
                                 setSelectedListing(listing)

@@ -1,16 +1,16 @@
 "use client";
 
 import { ArrowLeftCircle, Wallet } from "lucide-react";
-import { RegisterFormData, registerSchema } from "@/lib/validators/auth";
+import { RegisterFormData, registerSchema } from "../../../lib/validators/auth";
 import { useEffect, useState } from "react";
-import AuthButton from "@/components/forms/AuthButton";
-import AuthInput from "@/components/forms/AuthInput";
-import FormError from "@/components/forms/FormError";
+import AuthButton from "../../../components/forms/AuthButton";
+import AuthInput from "../../../components/forms/AuthInput";
+import FormError from "../../../components/forms/FormError";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "../../../lib/supabase/client";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useWallet } from "@/hooks/useWallet";
+import { useWallet } from "../../../hooks/useWallet";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +35,7 @@ export default function RegisterPage() {
     // During build, provider might not be available
     isConnected = false;
     walletPublicKey = null;
-    connect = async () => {};
+    connect = async () => { };
     isWalletConnecting = false;
   }
 

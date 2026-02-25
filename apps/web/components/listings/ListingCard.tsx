@@ -25,8 +25,8 @@ interface ListingCardProps {
 export default function ListingCard({ listing, hideCompare = false }: ListingCardProps) {
     // Use the first image from the array or fallback
     const images = (listing as any).images || [];
-    const imageUrl = images.length > 0 
-        ? images[0] 
+    const imageUrl = images.length > 0
+        ? images[0]
         : '/images/airbnb1.jpg' // Ensure this fallback exists in public/images
 
     return (
@@ -43,7 +43,7 @@ export default function ListingCard({ listing, hideCompare = false }: ListingCar
                     <div className="absolute top-3 left-3 z-10 flex items-center gap-2" onClick={(e) => e.preventDefault()}>
                         <FavoriteButton listingId={listing.id} />
                         {!hideCompare && (
-                            <CompareButtonIcon listing={listing} />
+                            <CompareButtonIcon listing={listing as any} />
                         )}
                     </div>
                 </Link>

@@ -32,7 +32,7 @@ export default function ComparePage() {
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle')
 
   // Check for URL params (shared comparison)
-  const urlIds = searchParams.getAll('ids')
+  const urlIds = searchParams?.getAll('ids') || []
   const hasUrlIds = urlIds.length > 0
 
   // Load listings from URL params or context

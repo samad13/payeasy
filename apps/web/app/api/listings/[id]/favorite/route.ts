@@ -8,6 +8,9 @@ export async function POST(
 ) {
   const { id: listingId } = await params
   const supabase = await createClient()
+  if (!supabase) {
+    return errorResponse('Supabase is not configured.', 503)
+  }
 
   const {
     data: { user },
@@ -51,6 +54,9 @@ export async function DELETE(
 ) {
   const { id: listingId } = await params
   const supabase = await createClient()
+  if (!supabase) {
+    return errorResponse('Supabase is not configured.', 503)
+  }
 
   const {
     data: { user },

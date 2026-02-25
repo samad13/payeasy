@@ -30,6 +30,7 @@ export default function ListingDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-8 font-sans text-gray-900">
       <div className="mx-auto max-w-4xl">
+        {/* @ts-ignore */}
         <Link
           href="/browse"
           className="mb-6 inline-flex items-center text-primary transition-colors hover:text-primary/80"

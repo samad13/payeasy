@@ -1,185 +1,120 @@
+import { Request } from "next/server";
 import {
-    buildMessage,
-    isTimestampValid,
-    signJwt,
-    verifySignature,
+  buildMessage,
+  isTimestampValid,
+  signJwt,
+  verifySignature,
 } from "@/lib/auth/stellar-auth";
-
-import { NextResponse } from "next/server";
+import {
+  successResponse,
+  errorResponse,
+  handleError,
+} from "@/app/api/utils/response";
 import { logAuthEvent, AuthEventType } from "@/lib/security/authLogging";
 
-/** Cookie max-age in seconds (24 hours). */
-const COOKIE_MAX_AGE = 86_400;
+const COOKIE_MAX_AGE = 86_400; // 24 hours
 
 /**
  * POST /api/auth/verify
  *
  * Accepts `{ publicKey, signature, nonce, timestamp }`, verifies the Stellar
- * signature, and returns a JWT token stored in a secure HTTP-only cookie.
+ * signature, and returns a JWT stored in a secure HTTP-only cookie.
  */
 export async function POST(request: Request) {
-    let publicKey: string | undefined;
-    try {
-        const body = await request.json();
-        ({ publicKey } = body);
-        const { signature, nonce, timestamp } = body;
+  const requestId = request.headers.get("x-request-id") ?? undefined;
+  let publicKey: string | undefined;
 
-        // --- Input validation ------------------------------------------------
-
-        if (!publicKey || !signature || !nonce || timestamp == null) {
-            await logAuthEvent({
-                publicKey,
-                eventType: AuthEventType.LOGIN_FAILURE,
-                status: "FAILURE",
-                failureReason: "Missing required fields",
-            }, request);
-        }
-
-        if (!publicKey) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: {
-                        code: "MISSING_FIELD",
-                        message: "Missing required field: publicKey",
-                        field: "publicKey",
-                    },
-                },
-                { status: 400 }
-            );
-        }
-
-        if (!signature) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: {
-                        code: "MISSING_FIELD",
-                        message: "Missing required field: signature",
-                        field: "signature",
-                    },
-                },
-                { status: 400 }
-            );
-        }
-
-        if (!nonce) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: {
-                        code: "MISSING_FIELD",
-                        message: "Missing required field: nonce",
-                        field: "nonce",
-                    },
-                },
-                { status: 400 }
-            );
-        }
-
-        if (timestamp == null) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: {
-                        code: "MISSING_FIELD",
-                        message: "Missing required field: timestamp",
-                        field: "timestamp",
-                    },
-                },
-                { status: 400 }
-            );
-        }
-
-        // --- Replay protection -----------------------------------------------
-
-        if (!isTimestampValid(timestamp)) {
-            await logAuthEvent({
-                publicKey,
-                eventType: AuthEventType.LOGIN_FAILURE,
-                status: "FAILURE",
-                failureReason: "Challenge expired",
-            }, request);
-
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: {
-                        code: "CHALLENGE_EXPIRED",
-                        message: "Challenge expired",
-                        timestamp,
-                    },
-                },
-                { status: 401 }
-            );
-        }
-
-        // --- Signature verification ------------------------------------------
-
-        const message = buildMessage(nonce, timestamp);
-        const isValid = verifySignature(publicKey, signature, message);
-
-        if (!isValid) {
-            await logAuthEvent({
-                publicKey,
-                eventType: AuthEventType.LOGIN_FAILURE,
-                status: "FAILURE",
-                failureReason: "Invalid signature",
-            }, request);
-
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: {
-                        code: "INVALID_SIGNATURE",
-                        message: "Invalid signature",
-                    },
-                },
-                { status: 401 }
-            );
-        }
-
-        // --- Issue JWT -------------------------------------------------------
-
-        const token = signJwt(publicKey);
-
-        await logAuthEvent({
-            publicKey,
-            eventType: AuthEventType.LOGIN_SUCCESS,
-            status: "SUCCESS",
-        }, request);
-
-        const response = NextResponse.json({
-            success: true,
-            data: { publicKey, token },
-        });
-
-        response.cookies.set("auth-token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            path: "/",
-            maxAge: COOKIE_MAX_AGE,
-        });
-
-        return response;
-    } catch {
-        await logAuthEvent({
-            publicKey,
-            eventType: AuthEventType.LOGIN_FAILURE,
-            status: "FAILURE",
-            failureReason: "Internal server error during verification",
-        }, request);
-
-        return NextResponse.json(
-            {
-                success: false,
-                error: {
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Internal server error",
-                },
-            },
-            { status: 500 }
-        );
+  try {
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return errorResponse("Invalid JSON body", 400);
     }
+
+    const { signature, nonce, timestamp } = body;
+    publicKey = body.publicKey;
+
+    // --- Required fields validation ---
+    if (!publicKey || !signature || !nonce || timestamp == null) {
+      await logAuthEvent(
+        {
+          publicKey,
+          eventType: AuthEventType.LOGIN_FAILURE,
+          status: "FAILURE",
+          failureReason: "Missing required fields",
+        },
+        request
+      );
+
+      return errorResponse(
+        "publicKey, signature, nonce, and timestamp are required",
+        400
+      );
+    }
+
+    // --- Replay protection ---
+    if (!isTimestampValid(timestamp)) {
+      await logAuthEvent(
+        {
+          publicKey,
+          eventType: AuthEventType.LOGIN_FAILURE,
+          status: "FAILURE",
+          failureReason: "Challenge expired",
+        },
+        request
+      );
+
+      return errorResponse("Challenge expired", 401);
+    }
+
+    // --- Signature verification ---
+    const message = buildMessage(nonce, timestamp);
+    if (!verifySignature(publicKey, signature, message)) {
+      await logAuthEvent(
+        {
+          publicKey,
+          eventType: AuthEventType.LOGIN_FAILURE,
+          status: "FAILURE",
+          failureReason: "Invalid signature",
+        },
+        request
+      );
+
+      return errorResponse("Invalid signature", 401);
+    }
+
+    // --- Issue JWT ---
+    const token = signJwt(publicKey);
+
+    await logAuthEvent(
+      {
+        publicKey,
+        eventType: AuthEventType.LOGIN_SUCCESS,
+        status: "SUCCESS",
+      },
+      request
+    );
+
+    const response = successResponse({ publicKey });
+    response.cookies.set("auth-token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: COOKIE_MAX_AGE,
+    });
+
+    return response;
+  } catch (err) {
+    await logAuthEvent(
+      {
+        publicKey,
+        eventType: AuthEventType.LOGIN_FAILURE,
+        status: "FAILURE",
+        failureReason: "Internal server error during verification",
+      },
+      request
+    );
+
+    return handleError(err, requestId);
+  }
 }

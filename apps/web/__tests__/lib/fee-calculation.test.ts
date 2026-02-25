@@ -37,6 +37,10 @@ jest.mock("stellar-sdk", () => {
             }),
           },
         }),
+        prepareTransaction: jest.fn().mockResolvedValue({
+          fee: "100",
+          toXDR: () => "mock-xdr",
+        }),
         prepareTransaction: jest.fn().mockImplementation(async (tx) => tx),
       })),
     },
@@ -50,11 +54,12 @@ describe("Fee Calculation Logic", () => {
       contractId: "C...",
       method: "deposit",
       args: [],
-      network: "testnet",
+      network: "testnet" as any,
     };
 
     const build = await buildContractTransaction(params);
 
+    expect(build.feeStats?.inclusionFee.mode).toBe("150");
     // Initial minResourceFee was 1000
     // Buffer 20% = 200
     // Total resource fee = 1200
@@ -68,6 +73,5 @@ describe("Fee Calculation Logic", () => {
 
     expect((build.feeStats as any)?.inclusionFee.mode).toBe("150");
     expect(build.gasEstimate?.stroops).toBe(1000);
-    // In the real code, we'd check if the transaction fee was set to 1350.
   });
 });

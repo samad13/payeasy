@@ -168,17 +168,17 @@ const SECURITY_HEADER_VALUES = {
 } as const;
 
 const ROLE_PERMISSIONS: Record<PaymentActorRole, ReadonlySet<PaymentPermission>> = {
-  service: new Set(["payments:create", "payments:update", "payments:read", "payments:audit"]),
-  admin: new Set([
+  service: new Set<PaymentPermission>(["payments:create", "payments:update", "payments:read", "payments:audit"]),
+  admin: new Set<PaymentPermission>([
     "payments:create",
     "payments:update",
     "payments:refund",
     "payments:read",
     "payments:audit",
   ]),
-  support: new Set(["payments:read"]),
-  user: new Set(["payments:create", "payments:read"]),
-  auditor: new Set(["payments:read", "payments:audit"]),
+  support: new Set<PaymentPermission>(["payments:read"]),
+  user: new Set<PaymentPermission>(["payments:create", "payments:read"]),
+  auditor: new Set<PaymentPermission>(["payments:read", "payments:audit"]),
 };
 
 const REDACTED = "[REDACTED]";
@@ -419,8 +419,8 @@ export function createPciBreachIncidentResponse(input: {
     incidentId,
     detectedAt,
     severity: input.severity,
-    suspectedSystems: [...new Set(input.suspectedSystems)],
-    suspectedDataTypes: [...new Set(input.suspectedDataTypes)],
+    suspectedSystems: input.suspectedSystems.filter((v, i, a) => a.indexOf(v) === i),
+    suspectedDataTypes: input.suspectedDataTypes.filter((v, i, a) => a.indexOf(v) === i),
     containmentActions,
     notificationActions,
     investigationActions,

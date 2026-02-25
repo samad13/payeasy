@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 
 export const dynamic = 'force-dynamic';
 
+
 // Simulate metric fluctuations for demo purposes
 function generateMetricUpdate() {
   const baseStats = {

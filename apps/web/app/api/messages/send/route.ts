@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { successResponse, errorResponse, getUserId } from "@/lib/api-utils";
+import { successResponse, errorResponse, handleError } from "@/app/api/utils/response";
+import { getUserId } from "@/app/api/utils/auth";
 import { validateSendMessage } from "@/lib/validators/messages";
 import type { Message } from "@/lib/types/messages";
 
@@ -11,11 +12,11 @@ import type { Message } from "@/lib/types/messages";
  * users if one does not already exist.
  */
 export async function POST(request: NextRequest) {
+  const requestId = request.headers.get("x-request-id") ?? undefined;
   try {
-    // 1. Authenticate
     const senderId = getUserId(request);
     if (!senderId) {
-      return errorResponse("Authentication required.", 401, "UNAUTHORIZED");
+      return errorResponse("Authentication required.", 401);
     }
 
     // 2. Parse & validate body
@@ -28,8 +29,7 @@ export async function POST(request: NextRequest) {
     if (validation.errors) {
       return errorResponse(
         validation.errors.map((e) => `${e.field}: ${e.message}`).join("; "),
-        400,
-        "VALIDATION_ERROR"
+        400
       );
     }
 
@@ -50,14 +50,12 @@ export async function POST(request: NextRequest) {
       .single<Message>();
 
     if (msgError) {
-      console.error("Failed to insert message:", msgError);
-      return errorResponse("Failed to send message.", 500, "INTERNAL_ERROR");
+      return errorResponse("Failed to send message.", 500);
     }
 
     return successResponse(message, 201);
   } catch (err) {
-    console.error("POST /api/messages/send error:", err);
-    return errorResponse("Internal server error.", 500, "INTERNAL_ERROR");
+    return handleError(err, requestId);
   }
 }
 

@@ -9,6 +9,7 @@ import type { MapListing } from '../../components/MapView'
 import Image from 'next/image'
 import { MapPin, Bed, Bath, UserCircle } from 'lucide-react'
 import FavoriteButton from '../../components/FavoriteButton'
+import { ThemeToggle } from '../../components/ThemeToggle'
 
 const FilterSidebar = dynamic(() => import('../../components/FilterSidebar'), {
     loading: () => (
@@ -183,10 +184,10 @@ export default function BrowsePage() {
                         latitude: l.latitude || 0,
                         longitude: l.longitude || 0,
                     }));
-                    
+
                     if (listings.length > 0) {
-                         setFilteredProperties(listings);
-                         return;
+                        setFilteredProperties(listings);
+                        return;
                     }
                 }
             } catch (e) {
@@ -228,7 +229,7 @@ export default function BrowsePage() {
 
             setFilteredProperties(filtered)
         }
-        
+
         fetchListings();
     }, [searchParams, viewMode, mapBbox])
 
@@ -288,7 +289,7 @@ export default function BrowsePage() {
         },
         [buildParams, pathname, router]
     )
-    
+
     const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
         const url = new URL(window.location.href);
@@ -342,43 +343,43 @@ export default function BrowsePage() {
     }, [filteredProperties])
 
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+        <div className="min-h-screen bg-gray-50 text-gray-900 font-sans dark:bg-slate-950 dark:text-gray-100">
             {/* Header */}
-            <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm dark:bg-slate-900 dark:border-gray-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">P</div>
                         <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">PayEasy Browse</h1>
                     </div>
-                    <div 
+                    <div
                         className="relative"
                         onMouseEnter={() => setIsDropdownOpen(true)}
                         onMouseLeave={() => setIsDropdownOpen(false)}
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     >
                         <div className="flex items-center gap-4 cursor-pointer">
-                            <span className="text-sm font-medium text-gray-600 hidden sm:block">Demo User</span>
-                            <div className="w-9 h-9 bg-gray-100 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
+                            <ThemeToggle />
+                            <span className="text-sm font-medium text-gray-600 hidden sm:block dark:text-gray-300">Demo User</span>
+                            <div className="w-9 h-9 bg-gray-100 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">
                                 <UserCircle size={20} />
                             </div>
                         </div>
-                        
                         {isDropdownOpen && (
                             <div className="absolute right-0 top-full pt-2 w-48 z-50">
-                                <div className="bg-white rounded-md shadow-lg py-1 border border-gray-100">
-                                    <Link href="/users/user-1" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <div className="bg-white rounded-md shadow-lg py-1 border border-gray-100 dark:bg-slate-800 dark:border-slate-700">
+                                    <Link href="/users/user-1" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-700">
                                         My Profile
                                     </Link>
-                                    <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-700">
                                         Dashboard
                                     </Link>
-                                    <Link href="/payments/history" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <Link href="/payments/history" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-700">
                                         Payment History
                                     </Link>
-                                    <Link href="/auth/login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <Link href="/auth/login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-700">
                                         Login
                                     </Link>
-                                    <Link href="/auth/register" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <Link href="/auth/register" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-700">
                                         Register
                                     </Link>
                                 </div>
@@ -402,7 +403,7 @@ export default function BrowsePage() {
 
                         {/* Results Count, Sort & View Toggle */}
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-lg font-semibold text-gray-900">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                                 {filteredProperties.length} Properties Found
                             </h2>
                             <div className="flex items-center gap-4">
@@ -412,8 +413,8 @@ export default function BrowsePage() {
                                         id="sort-dropdown"
                                         value={
                                             currentSortBy === "recommended"
-                                            ? "recommended"
-                                            : `${currentSortBy}_${currentOrder}`
+                                                ? "recommended"
+                                                : `${currentSortBy}_${currentOrder}`
                                         }
                                         onChange={handleSortChange}
                                         className="rounded-md border-gray-300 bg-white py-1 pl-2 pr-8 text-sm font-medium text-gray-900 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
@@ -430,7 +431,7 @@ export default function BrowsePage() {
 
                         {/* Conditional: Grid View or Map View */}
                         {viewMode === 'map' ? (
-                            <div className="h-[400px] lg:h-[calc(100vh-12rem)] rounded-xl overflow-hidden border border-gray-200">
+                            <div className="h-[400px] lg:h-[calc(100vh-12rem)] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
                                 <MapView
                                     listings={mapListings}
                                     initialViewState={initialViewState}
@@ -444,8 +445,8 @@ export default function BrowsePage() {
                                 {filteredProperties.length > 0 ? (
                                     filteredProperties.map((property) => (
                                         <Link href={`/listings/${property.id}`} key={property.id} className="block group h-full">
-                                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group flex flex-col h-full">
-                                                <div className="relative h-56 w-full overflow-hidden bg-gray-100">
+                                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group flex flex-col h-full dark:bg-slate-900 dark:border-gray-800">
+                                                <div className="relative h-56 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                                                     <Image
                                                         src={property.image}
                                                         alt={property.title}
@@ -456,22 +457,22 @@ export default function BrowsePage() {
                                                     <div className="absolute top-3 left-3 z-10" onClick={(e) => e.preventDefault()}>
                                                         <FavoriteButton listingId={String(property.id)} />
                                                     </div>
-                                                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-semibold text-gray-900 shadow-sm z-10">
+                                                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-semibold text-gray-900 shadow-sm z-10 dark:bg-slate-900/90 dark:text-gray-100">
                                                         {property.type}
                                                     </div>
                                                 </div>
                                                 <div className="p-5 flex flex-col flex-1">
                                                     <div className="flex justify-between items-start mb-2">
                                                         <div>
-                                                            <h3 className="font-semibold text-gray-900 text-lg leading-tight mb-1 group-hover:text-primary transition-colors">{property.title}</h3>
-                                                            <div className="flex items-center text-gray-500 text-sm gap-1">
-                                                                <MapPin size={14} className="text-gray-400" />
+                                                            <h3 className="font-semibold text-gray-900 text-lg leading-tight mb-1 group-hover:text-primary transition-colors dark:text-gray-100">{property.title}</h3>
+                                                            <div className="flex items-center text-gray-500 text-sm gap-1 dark:text-gray-400">
+                                                                <MapPin size={14} className="text-gray-400 dark:text-gray-500" />
                                                                 {property.location}
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-gray-600 text-sm">
+                                                    <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-gray-600 text-sm dark:border-gray-800 dark:text-gray-400">
                                                         <div className="flex items-center gap-4">
                                                             <div className="flex items-center gap-1.5" title={`${property.bedrooms} Bedrooms`}>
                                                                 <Bed size={16} />
@@ -492,11 +493,11 @@ export default function BrowsePage() {
                                         </Link>
                                     ))
                                 ) : (
-                                    <div className="col-span-full py-16 text-center text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">
-                                        <div className="inline-flex items-center justify-center p-4 bg-gray-50 rounded-full mb-4">
-                                            <MapPin size={32} className="text-gray-300" />
+                                    <div className="col-span-full py-16 text-center text-gray-500 bg-white rounded-xl border border-dashed border-gray-300 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400">
+                                        <div className="inline-flex items-center justify-center p-4 bg-gray-50 rounded-full mb-4 dark:bg-slate-800">
+                                            <MapPin size={32} className="text-gray-300 dark:text-gray-500" />
                                         </div>
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-1">No properties found</h3>
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-1 dark:text-gray-100">No properties found</h3>
                                         <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">
                                             We couldn&apos;t find any matches for your current filters. Try adjusting your search criteria.
                                         </p>

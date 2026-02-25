@@ -212,13 +212,13 @@ export default function FilterSidebar() {
 
     // Prevent hydration mismatch by returning skeleton or null until mounted
     if (!mounted) return (
-        <div className="h-[600px] w-full max-w-sm animate-pulse rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-            <div className="mb-6 h-6 w-32 rounded bg-gray-200"></div>
+        <div className="h-[600px] w-full max-w-sm animate-pulse rounded-xl border border-gray-100 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-slate-900">
+            <div className="mb-6 h-6 w-32 rounded bg-gray-200 dark:bg-gray-700"></div>
             <div className="space-y-6">
-                <div className="h-10 rounded bg-gray-200"></div>
-                <div className="h-12 rounded bg-gray-200"></div>
-                <div className="h-12 rounded bg-gray-200"></div>
-                <div className="h-12 rounded bg-gray-200"></div>
+                <div className="h-10 rounded bg-gray-200 dark:bg-gray-700"></div>
+                <div className="h-12 rounded bg-gray-200 dark:bg-gray-700"></div>
+                <div className="h-12 rounded bg-gray-200 dark:bg-gray-700"></div>
+                <div className="h-12 rounded bg-gray-200 dark:bg-gray-700"></div>
             </div>
         </div>
     )
@@ -228,20 +228,20 @@ export default function FilterSidebar() {
     )
 
     return (
-        <div className="h-fit w-full max-w-sm rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+        <div className="h-fit w-full max-w-sm rounded-xl border border-gray-100 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-slate-900">
             <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Filters</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Filters</h2>
                 <div className="flex items-center gap-2">
                     <Link
                         href="/listings"
-                        className="group flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+                        className="group flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80 dark:text-primary dark:hover:text-primary/80"
                     >
                         <List size={14} /> List All
                     </Link>
-                    <div className="h-4 w-px bg-gray-200" />
+                    <div className="h-4 w-px bg-gray-200 dark:bg-gray-700" />
                     <button
                         onClick={clearFilters}
-                        className="group flex items-center gap-1 text-sm text-gray-500 transition-colors hover:text-primary"
+                        className="group flex items-center gap-1 text-sm text-gray-500 transition-colors hover:text-primary dark:text-gray-400 dark:hover:text-primary"
                     >
                         <X size={14} className="transition-transform group-hover:rotate-90" /> Clear all
                     </button>
@@ -251,23 +251,23 @@ export default function FilterSidebar() {
             <div className="space-y-6">
                 {/* Location with Autocomplete */}
                 <div className="relative" ref={suggestionsRef}>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">Location</label>
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
                     <input
                         type="text"
                         placeholder="City, Neighborhood, ZIP"
                         value={filters.location}
                         onChange={handleLocationChange}
                         onFocus={() => setShowSuggestions(true)}
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2 outline-none transition-all placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 outline-none transition-all placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-100 dark:placeholder:text-gray-500"
                     />
 
                     {showSuggestions && filters.location && filteredSuggestions.length > 0 && (
-                        <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-gray-100 bg-white shadow-xl">
+                        <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-gray-100 bg-white shadow-xl dark:border-gray-700 dark:bg-slate-800">
                             {filteredSuggestions.map((loc) => (
                                 <button
                                     key={loc}
                                     onClick={() => selectLocation(loc)}
-                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-primary"
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-primary dark:text-gray-300 dark:hover:bg-slate-700 dark:hover:text-primary"
                                 >
                                     {loc}
                                 </button>
@@ -278,7 +278,7 @@ export default function FilterSidebar() {
 
                 {/* Price Range */}
                 <div>
-                    <div className="mb-2 flex justify-between text-sm text-gray-600">
+                    <div className="mb-2 flex justify-between text-sm text-gray-600 dark:text-gray-400">
                         <span>Price Range</span>
                         <span className="rounded bg-primary/5 px-2 py-0.5 text-xs font-medium text-primary">
                             {filters.minPrice} - {filters.maxPrice} XLM
@@ -292,15 +292,15 @@ export default function FilterSidebar() {
                         minStepsBetweenThumbs={1}
                         onValueChange={handlePriceChange}
                     >
-                        <Slider.Track className="relative h-[4px] grow rounded-full bg-gray-100">
+                        <Slider.Track className="relative h-[4px] grow rounded-full bg-gray-100 dark:bg-gray-700">
                             <Slider.Range className="absolute h-full rounded-full bg-primary" />
                         </Slider.Track>
                         <Slider.Thumb
-                            className="block h-5 w-5 cursor-grab rounded-full border border-gray-200 bg-white shadow-sm transition-all hover:scale-110 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 active:cursor-grabbing"
+                            className="block h-5 w-5 cursor-grab rounded-full border border-gray-200 bg-white shadow-sm transition-all hover:scale-110 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 active:cursor-grabbing dark:border-gray-600 dark:bg-slate-800"
                             aria-label="Min Price"
                         />
                         <Slider.Thumb
-                            className="block h-5 w-5 cursor-grab rounded-full border border-gray-200 bg-white shadow-sm transition-all hover:scale-110 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 active:cursor-grabbing"
+                            className="block h-5 w-5 cursor-grab rounded-full border border-gray-200 bg-white shadow-sm transition-all hover:scale-110 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 active:cursor-grabbing dark:border-gray-600 dark:bg-slate-800"
                             aria-label="Max Price"
                         />
                     </Slider.Root>
@@ -309,37 +309,37 @@ export default function FilterSidebar() {
                 {/* Bedrooms & Bathrooms */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Bedrooms</label>
+                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Bedrooms</label>
                         <div className="relative">
                             <select
                                 value={filters.bedrooms}
                                 onChange={(e) => handleFilterChange('bedrooms', e.target.value)}
-                                className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-100"
                             >
                                 <option value="">Any</option>
                                 {BEDROOM_OPTIONS.map(opt => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                                 ))}
                             </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-400">
                                 <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
                             </div>
                         </div>
                     </div>
                     <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Bathrooms</label>
+                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Bathrooms</label>
                         <div className="relative">
                             <select
                                 value={filters.bathrooms}
                                 onChange={(e) => handleFilterChange('bathrooms', e.target.value)}
-                                className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-100"
                             >
                                 <option value="">Any</option>
                                 {BATHROOM_OPTIONS.map(opt => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                                 ))}
                             </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-400">
                                 <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
                             </div>
                         </div>
@@ -348,7 +348,7 @@ export default function FilterSidebar() {
 
                 {/* Amenities */}
                 <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">Amenities</label>
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Amenities</label>
                     <Select
                         isMulti
                         options={AMENITIES_OPTIONS}
@@ -371,6 +371,8 @@ export default function FilterSidebar() {
                                 boxShadow: state.isFocused ? '0 0 0 2px rgba(125, 0, 255, 0.2)' : 'none',
                                 borderRadius: '0.5rem',
                                 minHeight: '42px',
+                                backgroundColor: 'var(--color-background, white)',
+                                color: 'var(--color-foreground, black)',
                                 '&:hover': {
                                     borderColor: state.isFocused ? 'var(--color-primary-500, #7D00FF)' : '#D1D5DB'
                                 }
@@ -393,14 +395,26 @@ export default function FilterSidebar() {
                                     color: 'var(--color-primary-800, #6B21A8)',
                                 },
                             }),
+                            menu: (base) => ({
+                                ...base,
+                                backgroundColor: 'var(--color-background, white)',
+                                borderColor: 'var(--color-border, #E5E7EB)',
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isFocused 
+                                    ? 'var(--color-primary-50, #F3E8FF)' 
+                                    : 'transparent',
+                                color: 'var(--color-foreground, black)',
+                            }),
                         }}
                     />
                 </div>
 
                 {/* Toggles */}
                 <div className="space-y-4 pt-2">
-                    <label className="group -mx-2 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-gray-50">
-                        <span className="text-sm font-medium text-gray-700 transition-colors group-hover:text-primary">
+                    <label className="group -mx-2 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-gray-50 dark:hover:bg-slate-800/50">
+                        <span className="text-sm font-medium text-gray-700 transition-colors group-hover:text-primary dark:text-gray-300">
                             Furnished
                         </span>
                         <div className="relative">
@@ -410,12 +424,12 @@ export default function FilterSidebar() {
                                 onChange={(e) => handleFilterChange('furnished', e.target.checked)}
                                 className="peer sr-only"
                             />
-                            <div className="peer h-6 w-10 rounded-full bg-gray-200 transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20"></div>
+                            <div className="peer h-6 w-10 rounded-full bg-gray-200 transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 dark:bg-gray-700 dark:after:border-gray-600"></div>
                         </div>
                     </label>
 
-                    <label className="group -mx-2 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-gray-50">
-                        <span className="text-sm font-medium text-gray-700 transition-colors group-hover:text-primary">
+                    <label className="group -mx-2 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-gray-50 dark:hover:bg-slate-800/50">
+                        <span className="text-sm font-medium text-gray-700 transition-colors group-hover:text-primary dark:text-gray-300">
                             Pet-Friendly
                         </span>
                         <div className="relative">
@@ -425,7 +439,7 @@ export default function FilterSidebar() {
                                 onChange={(e) => handleFilterChange('petFriendly', e.target.checked)}
                                 className="peer sr-only"
                             />
-                            <div className="peer h-6 w-10 rounded-full bg-gray-200 transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20"></div>
+                            <div className="peer h-6 w-10 rounded-full bg-gray-200 transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 dark:bg-gray-700 dark:after:border-gray-600"></div>
                         </div>
                     </label>
                 </div>

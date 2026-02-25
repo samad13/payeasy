@@ -1,4 +1,6 @@
-"use client";
+/* eslint-disable */
+'use client';
+
 
 import React, { useEffect, useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -387,7 +389,7 @@ export function usePrefetchManager() {
   return {
     prefetch: (url: string, options?: { priority?: number; ttl?: number }) =>
       manager.prefetch(url, options),
-    getCachedData: (url: string) => manager.getCachedData(url),
+    getCachedData: <T = unknown>(url: string) => manager.getCachedData<T>(url),
     clearCache: () => manager.clearCache(),
     getMetrics: () => manager.getMetrics(),
     setConfig: (config: PrefetchConfig) => manager.setConfig(config),

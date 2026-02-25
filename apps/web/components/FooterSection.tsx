@@ -9,8 +9,8 @@ export interface FooterLinkItem {
   ariaLabel?: string
 }
 
-export interface FooterSectionProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: React.ReactNode
+export interface FooterSectionProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+  title?: React.ReactNode
   description?: React.ReactNode
   links?: FooterLinkItem[]
   listClassName?: string

@@ -257,6 +257,9 @@ export default function PaymentPage() {
             <div className="flex justify-between text-sm border-t border-white/10 pt-4">
               <span className="text-gray-400">Total Payment</span>
               <span className="text-xl font-bold text-indigo-400">
+                {(BigInt(listing.shareAmount * 10_000_000) + BigInt(feeDetails?.totalFee ?? 100)) / BigInt(10_000_000) === BigInt(listing.shareAmount)
+                  ? listing.shareAmount
+                  : Number((BigInt(listing.shareAmount * 10_000_000) + BigInt(feeDetails?.totalFee ?? 100)) / BigInt(10_000_000))}{" "}
                 {(BigInt(listing.shareAmount * 10_000_000) + BigInt(feeDetails?.totalFee ?? 100)) / 10_000_000n === BigInt(listing.shareAmount)
                   ? listing.shareAmount
                   : Number(BigInt(listing.shareAmount * 10_000_000) + BigInt(feeDetails?.totalFee ?? 100)) / 10_000_000}{" "}

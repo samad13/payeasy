@@ -1,7 +1,7 @@
 {
   "name": "payeasy",
   "version": "1.0.0",
-  "description": "**Blockchain-powered rent sharing made simple.**",
+  "description": "Blockchain-powered rent sharing made simple.",
   "homepage": "https://github.com/Ogstevyn/payeasy#readme",
   "bugs": {
     "url": "https://github.com/Ogstevyn/payeasy/issues"
@@ -27,21 +27,30 @@
     "start": "cd apps/web && npm run start",
     "lint": "cd apps/web && npm run lint",
     "format": "cd apps/web && npm run format",
-    "test": "echo \"No tests specified yet\"",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "cd apps/web && npm test",
     "test:e2e": "npx playwright test --config=e2e/playwright.config.ts",
     "test:e2e:ui": "npx playwright test --config=e2e/playwright.config.ts --ui",
-    "test:all": "npm run build && npm run lint && cd apps/web && npm test && cd ../.. && npm run test:e2e",
+    "test:all": "npm run build && npm run lint && npm run test:unit && npm run test:e2e",
     "install:web": "cd apps/web && npm install",
     "build:contract": "cd apps/web && npm run build:contract",
     "deploy:contract": "cd apps/web && npm run deploy:contract",
     "verify:contract": "cd apps/web && npm run verify:contract"
   },
   "dependencies": {
-    "sanitize-html": "^2.17.1"
+    "bidi-js": "^1.0.3",
+    "sanitize-html": "^2.17.1",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.3.0",
+    "@types/react": "18.2.79",
+    "@types/react-dom": "18.2.25",
     "@types/sanitize-html": "^2.16.0"
+  },
+  "overrides": {
+    "@types/react": "18.2.79",
+    "@types/react-dom": "18.2.25"
   }
 }

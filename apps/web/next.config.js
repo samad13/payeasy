@@ -7,6 +7,7 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 const nextConfig = {
   // Optimize package imports to enable tree-shaking for barrel files
   experimental: {
+    serverComponentsExternalPackages: ["@react-pdf/renderer"],
     optimizePackageImports: [
       "lucide-react",
       "@radix-ui/react-slider",
@@ -41,12 +42,16 @@ const nextConfig = {
   staticPageGenerationTimeout: 120,
 
   webpack(config, { isServer }) {
+    config.resolve.alias = config.resolve.alias || {};
+
     // Tree-shake mapbox-gl CSS import on the server
     if (isServer) {
       config.resolve.alias["mapbox-gl/dist/mapbox-gl.css"] = false;
     }
+
     // bidi-js: @react-pdf/textkit expects default export; ESM resolution breaks
     config.resolve.alias["bidi-js"] = require.resolve("bidi-js/dist/bidi.js");
+
     return config;
   },
 };

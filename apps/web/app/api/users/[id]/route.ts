@@ -3,10 +3,18 @@ import { getUserId, successResponse, errorResponse } from "@/lib/api-utils";
 import { createClient } from "@/lib/supabase/server";
 import { userUpdateSchema } from "@/lib/types/validation";
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+/**
+ * GET /api/users/[id]
+ *
+ * Supports lookup by UUID or by public_key (Stellar G...).
+ * Pass "me" to resolve the authenticated user.
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const { id: idParam } = await params;
-
     const supabase = await createClient();
 
     let targetId: string | null = null;
@@ -17,10 +25,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       targetId = idParam;
     }
 
+    // Support lookup by UUID or by Stellar public key
+    const isPublicKey = targetId.startsWith("G") && targetId.length === 56;
     const { data: user, error: userErr } = await supabase
       .from("users")
       .select("id,username,email,public_key,avatar_url,bio,created_at")
-      .eq("id", targetId)
+      .match(isPublicKey ? { public_key: targetId } : { id: targetId })
       .maybeSingle();
 
     if (userErr) return errorResponse(userErr.message, 400);
@@ -45,7 +55,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       targetId = idParam;
     }
 
-    // Only the owner may update their profile (service role can bypass)
     const requester = getUserId(request);
     if (requester !== targetId) return errorResponse("Forbidden", 403);
 
@@ -89,21 +98,18 @@ export async function PUT(
     const { id } = await params;
     const supabase = await createClient();
 
-    // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if the user is updating their own profile
     if (user.id !== id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const body = await request.json();
 
-    // Validate request body
     const validationResult = userUpdateSchema.safeParse(body);
 
     if (!validationResult.success) {
@@ -113,7 +119,6 @@ export async function PUT(
       );
     }
 
-    // Update the user profile in the database
     const { data, error } = await supabase
       .from("users")
       .update(validationResult.data)

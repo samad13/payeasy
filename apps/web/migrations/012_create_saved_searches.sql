@@ -21,3 +21,5 @@ CREATE POLICY "Users manage own saved searches"
   ON saved_searches FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON saved_searches TO authenticated;

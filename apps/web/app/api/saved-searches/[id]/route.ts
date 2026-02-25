@@ -22,7 +22,10 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   const body = await request.json();
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
+    return NextResponse.json(
+      { error: parsed.error.message, validation: parsed.error.flatten() },
+      { status: 422 },
+    );
   }
 
   const { data, error } = await supabase

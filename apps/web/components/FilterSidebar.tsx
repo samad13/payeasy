@@ -1,3 +1,14 @@
+"use client";
+
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import * as Slider from "@radix-ui/react-slider";
+import Select, { MultiValue, ActionMeta } from "react-select";
+import debounce from "lodash.debounce";
+import Link from "next/link";
+import { X, List, Bookmark, ChevronDown } from "lucide-react";
+import SaveSearchModal from "./SaveSearchModal";
+import SavedSearchesList from "./SavedSearchesList";
 'use client'
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
@@ -71,6 +82,220 @@ const INITIAL_FILTERS: FilterState = {
 }
 
 export default function FilterSidebar() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showSavedList, setShowSavedList] = useState(false);
+
+  // Local state for autocomplete
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Hydrate from URL helper
+  const getFiltersFromURL = useCallback((): FilterState => {
+    if (!searchParams) return INITIAL_FILTERS;
+    const params = new URLSearchParams(searchParams.toString());
+
+    return {
+      minPrice: Number(params.get("minPrice")) || INITIAL_FILTERS.minPrice,
+      maxPrice: Number(params.get("maxPrice")) || INITIAL_FILTERS.maxPrice,
+      bedrooms: params.get("bedrooms") || INITIAL_FILTERS.bedrooms,
+      bathrooms: params.get("bathrooms") || INITIAL_FILTERS.bathrooms,
+      furnished: params.get("furnished") === "true",
+      petFriendly: params.get("petFriendly") === "true",
+      amenities: params.get("amenities")
+        ? params.get("amenities")!.split(",")
+        : INITIAL_FILTERS.amenities,
+      location: params.get("location") || INITIAL_FILTERS.location,
+    };
+  }, [searchParams]);
+
+  // Initialize state
+  const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
+
+  // Handle Hydration Layout Shift & Sync
+  useEffect(() => {
+    setMounted(true);
+    setFilters(getFiltersFromURL());
+  }, [getFiltersFromURL]);
+
+  // Close suggestions on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // --- URL Sync Logic ---
+  const updateURL = useCallback(
+    (newFilters: FilterState) => {
+      const params = new URLSearchParams();
+
+      if (newFilters.minPrice > 0) params.set("minPrice", newFilters.minPrice.toString());
+      if (newFilters.maxPrice < 5000) params.set("maxPrice", newFilters.maxPrice.toString());
+      if (newFilters.bedrooms) params.set("bedrooms", newFilters.bedrooms);
+      if (newFilters.bathrooms) params.set("bathrooms", newFilters.bathrooms);
+      if (newFilters.furnished) params.set("furnished", "true");
+      if (newFilters.petFriendly) params.set("petFriendly", "true");
+      if (newFilters.amenities.length > 0) params.set("amenities", newFilters.amenities.join(","));
+      if (newFilters.location) params.set("location", newFilters.location);
+
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router]
+  );
+
+  // --- Debounced Updaters ---
+  const debouncedUpdateURL = useMemo(
+    () =>
+      debounce((newFilters: FilterState) => {
+        updateURL(newFilters);
+      }, 500),
+    [updateURL]
+  );
+
+  // --- Handlers ---
+
+  const handlePriceChange = (value: number[]) => {
+    const newFilters = { ...filters, minPrice: value[0], maxPrice: value[1] };
+    setFilters(newFilters);
+    debouncedUpdateURL(newFilters);
+  };
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const newFilters = { ...filters, location: val };
+    setFilters(newFilters);
+    debouncedUpdateURL(newFilters);
+    setShowSuggestions(true);
+  };
+
+  const selectLocation = (loc: string) => {
+    const newFilters = { ...filters, location: loc };
+    setFilters(newFilters);
+    debouncedUpdateURL(newFilters);
+    setShowSuggestions(false);
+  };
+
+  const handleFilterChange = (key: keyof FilterState, value: any) => {
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    updateURL(newFilters);
+  };
+
+  const handleAmenitiesChange = (
+    newValue: MultiValue<{ value: string; label: string }>,
+    actionMeta: ActionMeta<{ value: string; label: string }>
+  ) => {
+    const selectedAmenities = newValue.map((item) => item.value);
+    const newFilters = { ...filters, amenities: selectedAmenities };
+    setFilters(newFilters);
+    updateURL(newFilters);
+  };
+
+  const clearFilters = () => {
+    setFilters(INITIAL_FILTERS);
+    updateURL(INITIAL_FILTERS);
+  };
+
+  // Prevent hydration mismatch by returning skeleton or null until mounted
+  if (!mounted)
+    return (
+      <div className="h-[600px] w-full max-w-sm animate-pulse rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+        <div className="mb-6 h-6 w-32 rounded bg-gray-200"></div>
+        <div className="space-y-6">
+          <div className="h-10 rounded bg-gray-200"></div>
+          <div className="h-12 rounded bg-gray-200"></div>
+          <div className="h-12 rounded bg-gray-200"></div>
+          <div className="h-12 rounded bg-gray-200"></div>
+        </div>
+      </div>
+    );
+
+  const filteredSuggestions = LOCATION_SUGGESTIONS.filter(
+    (s) => s.toLowerCase().includes(filters.location.toLowerCase()) && s !== filters.location
+  );
+
+  const currentFiltersAsRecord: Record<string, unknown> = {
+    ...(filters.minPrice > 0 ? { minPrice: filters.minPrice } : {}),
+    ...(filters.maxPrice < 5000 ? { maxPrice: filters.maxPrice } : {}),
+    ...(filters.bedrooms ? { bedrooms: filters.bedrooms } : {}),
+    ...(filters.bathrooms ? { bathrooms: filters.bathrooms } : {}),
+    ...(filters.furnished ? { furnished: true } : {}),
+    ...(filters.petFriendly ? { petFriendly: true } : {}),
+    ...(filters.amenities.length > 0 ? { amenities: filters.amenities } : {}),
+    ...(filters.location ? { location: filters.location } : {}),
+  };
+
+  const handleRerun = (savedFilters: Record<string, unknown>) => {
+    const params = new URLSearchParams();
+    Object.entries(savedFilters).forEach(([k, v]) => {
+      if (Array.isArray(v)) params.set(k, v.join(","));
+      else if (v !== null && v !== undefined) params.set(k, String(v));
+    });
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    setShowSavedList(false);
+  };
+
+  return (
+    <>
+    {showSaveModal && (
+      <SaveSearchModal
+        currentFilters={currentFiltersAsRecord}
+        onClose={() => setShowSaveModal(false)}
+        onSaved={() => setShowSavedList(true)}
+      />
+    )}
+    <div className="h-fit w-full max-w-sm rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-900">Filters</h2>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/listings"
+            className="group flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            <List size={14} /> List All
+          </Link>
+          <div className="h-4 w-px bg-gray-200" />
+          <button
+            onClick={clearFilters}
+            className="group flex items-center gap-1 text-sm text-gray-500 transition-colors hover:text-primary"
+          >
+            <X size={14} className="transition-transform group-hover:rotate-90" /> Clear all
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* Location with Autocomplete */}
+        <div className="relative" ref={suggestionsRef}>
+          <label className="mb-2 block text-sm font-medium text-gray-700">Location</label>
+          <input
+            type="text"
+            placeholder="City, Neighborhood, ZIP"
+            value={filters.location}
+            onChange={handleLocationChange}
+            onFocus={() => setShowSuggestions(true)}
+            className="w-full rounded-lg border border-gray-200 px-4 py-2 outline-none transition-all placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+
+          {showSuggestions && filters.location && filteredSuggestions.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-gray-100 bg-white shadow-xl">
+              {filteredSuggestions.map((loc) => (
+                <button
+                  key={loc}
+                  onClick={() => selectLocation(loc)}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-primary"
+                >
+                  {loc}
+                </button>
+              ))}
     const router = useRouter()
     const searchParams = useSearchParams()
     const pathname = usePathname()
@@ -445,5 +670,29 @@ export default function FilterSidebar() {
                 </div>
             </div>
         </div>
+      </div>
+
+      {/* Save Search & Saved Searches */}
+      <div className="mt-6 space-y-3 border-t border-gray-100 pt-5">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowSaveModal(true)}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+          >
+            <Bookmark size={14} /> Save search
+          </button>
+          <button
+            onClick={() => setShowSavedList((v) => !v)}
+            className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50"
+          >
+            Saved <ChevronDown size={14} className={`transition-transform ${showSavedList ? "rotate-180" : ""}`} />
+          </button>
+        </div>
+        {showSavedList && <SavedSearchesList onRerun={handleRerun} />}
+      </div>
+    </div>
+    </>
+  );
+}
     )
 }

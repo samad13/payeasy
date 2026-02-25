@@ -477,6 +477,89 @@ export interface UserFavoriteWithListing extends UserFavorite {
 }
 
 // ──────────────────────────────────────────────────────────────
+// Notifications
+// ──────────────────────────────────────────────────────────────
+
+/** Notification category matching the `notification_type` DB enum. */
+export type NotificationType =
+  | 'message'
+  | 'payment'
+  | 'listing'
+  | 'system'
+  | 'favorite'
+  | 'agreement'
+
+/** Exact database row shape for the `notifications` table. */
+export interface NotificationRow {
+  id: string
+  user_id: string
+  type: NotificationType
+  title: string
+  message: string
+  is_read: boolean
+  action_url: string | null
+  action_label: string | null
+  metadata: Record<string, unknown>
+  created_at: ISOTimestamp
+  read_at: ISOTimestamp | null
+}
+
+/** Domain-layer notification. */
+export interface Notification {
+  id: string
+  user_id: string
+  type: NotificationType
+  title: string
+  message: string
+  is_read: boolean
+  action_url?: string
+  action_label?: string
+  metadata: Record<string, unknown>
+  created_at: ISOTimestamp
+  read_at?: ISOTimestamp
+}
+
+export type NotificationInsert = Omit<NotificationRow, 'id' | 'created_at' | 'read_at'> & {
+  id?: string
+}
+
+export type NotificationUpdate = Partial<Pick<NotificationRow, 'is_read' | 'read_at'>>
+
+/** Exact database row shape for the `notification_preferences` table. */
+export interface NotificationPreferencesRow {
+  id: string
+  user_id: string
+  messages_enabled: boolean
+  payments_enabled: boolean
+  listings_enabled: boolean
+  system_enabled: boolean
+  favorites_enabled: boolean
+  agreements_enabled: boolean
+  sound_enabled: boolean
+  email_enabled: boolean
+  created_at: ISOTimestamp
+  updated_at: ISOTimestamp
+}
+
+/** Domain-layer notification preferences. */
+export interface NotificationPreferences {
+  id: string
+  user_id: string
+  messages_enabled: boolean
+  payments_enabled: boolean
+  listings_enabled: boolean
+  system_enabled: boolean
+  favorites_enabled: boolean
+  agreements_enabled: boolean
+  sound_enabled: boolean
+  email_enabled: boolean
+}
+
+export type NotificationPreferencesUpdate = Partial<
+  Omit<NotificationPreferencesRow, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+>
+
+// ──────────────────────────────────────────────────────────────
 // GDPR Compliance
 // ──────────────────────────────────────────────────────────────
 
@@ -575,6 +658,16 @@ export interface Database {
         Insert: AuditLogInsert
         Update: never
       }
+      notifications: {
+        Row: NotificationRow
+        Insert: NotificationInsert
+        Update: NotificationUpdate
+      }
+      notification_preferences: {
+        Row: NotificationPreferencesRow
+        Insert: Omit<NotificationPreferencesRow, 'id' | 'created_at' | 'updated_at'> & { id?: string }
+        Update: NotificationPreferencesUpdate
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -583,6 +676,7 @@ export interface Database {
       payment_status: PaymentStatus
       agreement_status: AgreementStatus
       message_type: MessageType
+      notification_type: NotificationType
     }
   }
 }

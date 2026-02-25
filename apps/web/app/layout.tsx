@@ -14,6 +14,8 @@ import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { Toaster } from "react-hot-toast";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import NotificationProvider from "@/providers/NotificationProvider";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import "./globals.css";
 import "@fontsource-variable/inter";
 
@@ -58,11 +60,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       {/* Sidebar - app-wide navigation */}
                       <Sidebar />
 
-                      {/* Main content - full width; sidebar overlays content on desktop */}
-                      <main className="min-h-screen w-full">
-                        {children}
-                        <DynamicComparisonBar />
-                      </main>
+                      <NotificationProvider>
+                        {/* Main content - full width; sidebar overlays content on desktop */}
+                        <main className="min-h-screen w-full">
+                          {children}
+                          <DynamicComparisonBar />
+                        </main>
+                        <NotificationCenter />
+                      </NotificationProvider>
                     </ComparisonProvider>
                   </FavoritesProvider>
                 </AuthProvider>

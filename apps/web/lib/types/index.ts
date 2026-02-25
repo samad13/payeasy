@@ -84,6 +84,16 @@ export type {
   UserFavoriteInsert,
   UserFavoriteWithListing,
 
+  // Notification
+  NotificationType,
+  NotificationRow,
+  Notification,
+  NotificationInsert,
+  NotificationUpdate,
+  NotificationPreferencesRow,
+  NotificationPreferences,
+  NotificationPreferencesUpdate,
+
   // Supabase typed client interface
   Database,
 } from './database'
